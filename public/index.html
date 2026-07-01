@@ -47,6 +47,9 @@
         <h1 class="brand-text">IOWFNAMES</h1>
       </div>
       <div class="top-nav-controls">
+        <button id="fullscreen-btn" class="icon-btn btn-secondary" title="Tam Ekran">
+          <i class="fa-solid fa-expand"></i> Tam Ekran
+        </button>
         <button id="rules-btn" class="icon-btn btn-secondary" title="Kuralları Göster">
           <i class="fa-solid fa-book"></i> Kurallar
         </button>
@@ -99,79 +102,118 @@
 
       <!-- 2. LOBBY SCREEN -->
       <section id="screen-lobby" class="screen">
-        <div class="lobby-grid">
+        <div class="lobby-new-layout">
           
-          <!-- Left Column: Settings and Roles -->
-          <div class="lobby-left-column">
-            <!-- Room Info & Share -->
-            <div class="glass-panel lobby-room-info">
-              <div class="room-code-container">
-                <span class="label">LOBİ KODU</span>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <strong id="display-room-code">------</strong>
-                  <button id="copy-code-btn" class="small-btn" title="Kodu Kopyala"><i class="fa-solid fa-copy"></i></button>
-                </div>
+          <!-- Top Row: Room Info & Share -->
+          <div class="glass-panel lobby-room-info">
+            <div class="room-code-container">
+              <span class="label">LOBİ KODU</span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <strong id="display-room-code">------</strong>
+                <button id="copy-code-btn" class="small-btn" title="Kodu Kopyala"><i class="fa-solid fa-copy"></i></button>
               </div>
-              <button id="share-room-btn" class="btn btn-secondary btn-glow">
-                <i class="fa-solid fa-share-nodes"></i> Lobi Bilgilerini Kopyala
-              </button>
+            </div>
+            <button id="share-room-btn" class="btn btn-secondary btn-glow">
+              <i class="fa-solid fa-share-nodes"></i> Lobi Bilgilerini Kopyala
+            </button>
+          </div>
+
+          <!-- Middle Row: 3 Columns Grid -->
+          <div class="lobby-3col-grid">
+            
+            <!-- Column 1: Red Team Slots -->
+            <div class="glass-panel lobby-team-card red">
+              <div class="lobby-team-slots red">
+                <div class="slots-header">
+                  <span><i class="fa-solid fa-square text-red"></i> <span id="lobby-red-team-name-text">KIRMIZI TAKIM</span></span>
+                  <button type="button" class="edit-team-name-btn" id="btn-edit-red-team" title="Takım adını değiştir"><i class="fa-solid fa-pen"></i></button>
+                </div>
+                
+                <button class="role-slot-btn select-role-btn" data-team="red" data-role="spymaster">
+                  <span class="role-title">👑 Lider Ol</span>
+                  <span class="role-desc">Gizli renkleri görür ve ipucu verir (Maks 1)</span>
+                </button>
+                <div id="lobby-red-spymaster" class="players-sublist empty">Lider Yok</div>
+                
+                <button class="role-slot-btn select-role-btn" data-team="red" data-role="agent">
+                  <span class="role-title">👤 Ekip Ol</span>
+                  <span class="role-desc">İpuçlarını yorumlayıp kartları seçer</span>
+                </button>
+                <div id="lobby-red-agents" class="players-sublist empty">Ekip Yok</div>
+              </div>
             </div>
 
-            <!-- Role Selection Slots -->
-            <!-- Role Selection Slots -->
-            <div class="glass-panel lobby-roles-card">
-              <h4>Takım ve Rol Seçimi</h4>
+            <!-- Column 2 (Middle): Chat/Players Tab + Spectators -->
+            <div class="lobby-middle-col">
               
-              <div class="team-role-slots-grid">
-                <!-- Red Team Slots -->
-                <div class="lobby-team-slots red">
-                  <div class="slots-header">
-                    <span><i class="fa-solid fa-square text-red"></i> <span id="lobby-red-team-name-text">KIRMIZI TAKIM</span></span>
-                    <button type="button" class="edit-team-name-btn" id="btn-edit-red-team" title="Takım adını değiştir"><i class="fa-solid fa-pen"></i></button>
-                  </div>
-                  
-                  <button class="role-slot-btn select-role-btn" data-team="red" data-role="spymaster">
-                    <span class="role-title">👑 Lider Ol</span>
-                    <span class="role-desc">Gizli renkleri görür ve ipucu verir (Maks 1)</span>
-                  </button>
-                  <div id="lobby-red-spymaster" class="players-sublist empty">Lider Yok</div>
-                  
-                  <button class="role-slot-btn select-role-btn" data-team="red" data-role="agent">
-                    <span class="role-title">👤 Ekip Ol</span>
-                    <span class="role-desc">İpuçlarını yorumlayıp kartları seçer</span>
-                  </button>
-                  <div id="lobby-red-agents" class="players-sublist empty">Ekip Yok</div>
+              <!-- Chat + Active Users Card -->
+              <div class="lobby-room-panel glass-panel">
+                <div class="room-panel-tabs">
+                  <button class="tab-btn active" id="tab-chat-btn"><i class="fa-solid fa-comments"></i> Sohbet</button>
+                  <button class="tab-btn" id="tab-players-btn"><i class="fa-solid fa-users"></i> Oyuncular (<span id="player-count-lobby">1</span>)</button>
                 </div>
-
-                <!-- Blue Team Slots -->
-                <div class="lobby-team-slots blue">
-                  <div class="slots-header">
-                    <span><i class="fa-solid fa-square text-blue"></i> <span id="lobby-blue-team-name-text">MAVİ TAKIM</span></span>
-                    <button type="button" class="edit-team-name-btn" id="btn-edit-blue-team" title="Takım adını değiştir"><i class="fa-solid fa-pen"></i></button>
+                
+                <div class="room-panel-content">
+                  <!-- Chat Container -->
+                  <div class="tab-content active" id="chat-tab-content">
+                    <div class="lobby-chat-messages" id="lobby-chat-box">
+                      <div class="chat-bubble system">
+                        <span>Lobiye hoş geldiniz! İletişim kurmak için sohbet edebilirsiniz.</span>
+                      </div>
+                    </div>
+                    <form class="lobby-chat-form" id="lobby-chat-form" onsubmit="return false;">
+                      <input type="text" id="lobby-chat-input" placeholder="Mesajınızı yazın..." maxlength="100" required autocomplete="off">
+                      <button type="submit" class="small-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
                   </div>
-                  
-                  <button class="role-slot-btn select-role-btn" data-team="blue" data-role="spymaster">
-                    <span class="role-title">👑 Lider Ol</span>
-                    <span class="role-desc">Gizli renkleri görür ve ipucu verir (Maks 1)</span>
-                  </button>
-                  <div id="lobby-blue-spymaster" class="players-sublist empty">Lider Yok</div>
-                  
-                  <button class="role-slot-btn select-role-btn" data-team="blue" data-role="agent">
-                    <span class="role-title">👤 Ekip Ol</span>
-                    <span class="role-desc">İpuçlarını yorumlayıp kartları seçer</span>
-                  </button>
-                  <div id="lobby-blue-agents" class="players-sublist empty">Ekip Yok</div>
+
+                  <!-- Players list with Admin Actions -->
+                  <div class="tab-content" id="players-tab-content">
+                    <div class="admin-players-list" id="admin-players-box">
+                      <!-- Players listing with Host controls -->
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Spectator Option -->
-              <button class="role-btn select-role-btn active mt-10 w-100" data-team="spectator" data-role="agent">
-                👀 Gözcüler
-              </button>
-              <div id="spectator-list" class="players-sublist empty mt-10">Gözcü Yok</div>
+              <!-- Spectators (Gözcüler) card -->
+              <div class="glass-panel lobby-spectators-card">
+                <button class="role-btn select-role-btn active w-100" data-team="spectator" data-role="agent">
+                  👀 Gözcüler
+                </button>
+                <div id="spectator-list" class="players-sublist empty mt-10">Gözcü Yok</div>
+              </div>
+
             </div>
 
-            <!-- Admin Game Settings Panel (Host Only) -->
+            <!-- Column 3: Blue Team Slots -->
+            <div class="glass-panel lobby-team-card blue">
+              <div class="lobby-team-slots blue">
+                <div class="slots-header">
+                  <span><i class="fa-solid fa-square text-blue"></i> <span id="lobby-blue-team-name-text">MAVİ TAKIM</span></span>
+                  <button type="button" class="edit-team-name-btn" id="btn-edit-blue-team" title="Takım adını değiştir"><i class="fa-solid fa-pen"></i></button>
+                </div>
+                
+                <button class="role-slot-btn select-role-btn" data-team="blue" data-role="spymaster">
+                  <span class="role-title">👑 Lider Ol</span>
+                  <span class="role-desc">Gizli renkleri görür ve ipucu verir (Maks 1)</span>
+                </button>
+                <div id="lobby-blue-spymaster" class="players-sublist empty">Lider Yok</div>
+                
+                <button class="role-slot-btn select-role-btn" data-team="blue" data-role="agent">
+                  <span class="role-title">👤 Ekip Ol</span>
+                  <span class="role-desc">İpuçlarını yorumlayıp kartları seçer</span>
+                </button>
+                <div id="lobby-blue-agents" class="players-sublist empty">Ekip Yok</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Row: Admin Settings & Action Buttons -->
+          <div class="lobby-bottom-row">
+            
+            <!-- Admin Settings Panel (Host Only) -->
             <div class="glass-panel lobby-admin-panel" id="lobby-admin-controls" style="display: none;">
               <h4><i class="fa-solid fa-gears"></i> Lobi Ayarları (HOST)</h4>
               
@@ -194,62 +236,33 @@
                     <option value="8">8 Oyuncu</option>
                     <option value="10">10 Oyuncu</option>
                     <option value="20">20 Oyuncu</option>
-                    <option value="unlimited" selected>Sınırsız (∞</option>
+                    <option value="unlimited" selected>Sınırsız (∞)</option>
                   </select>
                 </div>
               </div>
 
               <div class="host-lobby-actions mt-10">
-                <button id="shuffle-teams-btn" class="btn btn-secondary w-100 mb-5">
+                <button id="shuffle-teams-btn" class="btn btn-secondary w-100">
                   <i class="fa-solid fa-shuffle"></i> Takımları Karıştır
                 </button>
               </div>
             </div>
 
-            <!-- Action Controls -->
-            <div class="lobby-action-buttons">
+            <!-- Action Controls Card -->
+            <div class="glass-panel lobby-actions-card">
               <button id="start-game-btn" class="btn btn-primary btn-glow w-100">
                 <i class="fa-solid fa-play"></i> Oyunu Başlat
               </button>
               
-              <button id="test-mode-btn" class="btn btn-local w-100" title="Botları ekler ve oyunu anında başlatır">
+              <button id="test-mode-btn" class="btn btn-local w-100 mt-5" title="Botları ekler ve oyunu anında başlatır">
                 <i class="fa-solid fa-vial"></i> TEST MODU
               </button>
               
-              <button class="btn btn-danger leave-room-btn w-100">
+              <button class="btn btn-danger leave-room-btn w-100 mt-5">
                 <i class="fa-solid fa-door-open"></i> Lobiden Ayrıl
               </button>
             </div>
-          </div>
 
-          <!-- Right Column: Room Panel (Chat + Active Users) -->
-          <div class="lobby-room-panel glass-panel">
-            <div class="room-panel-tabs">
-              <button class="tab-btn active" id="tab-chat-btn"><i class="fa-solid fa-comments"></i> Sohbet</button>
-              <button class="tab-btn" id="tab-players-btn"><i class="fa-solid fa-users"></i> Oyuncular (<span id="player-count-lobby">1</span>)</button>
-            </div>
-            
-            <div class="room-panel-content">
-              <!-- Chat Container -->
-              <div class="tab-content active" id="chat-tab-content">
-                <div class="lobby-chat-messages" id="lobby-chat-box">
-                  <div class="chat-bubble system">
-                    <span>Lobiye hoş geldiniz! İletişim kurmak için sohbet edebilirsiniz.</span>
-                  </div>
-                </div>
-                <form class="lobby-chat-form" id="lobby-chat-form" onsubmit="return false;">
-                  <input type="text" id="lobby-chat-input" placeholder="Mesajınızı yazın..." maxlength="100" required autocomplete="off">
-                  <button type="submit" class="small-btn"><i class="fa-solid fa-paper-plane"></i></button>
-                </form>
-              </div>
-
-              <!-- Players list with Admin Actions -->
-              <div class="tab-content" id="players-tab-content">
-                <div class="admin-players-list" id="admin-players-box">
-                  <!-- Players listing with Host controls -->
-                </div>
-              </div>
-            </div>
           </div>
 
         </div>

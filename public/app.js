@@ -1472,3 +1472,30 @@ function showCluePopup(word, count, team) {
     }, 600);
   }, 3000);
 }
+
+// ============ FULLSCREEN MODE CONTROLLER ============
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+if (fullscreenBtn) {
+  fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen()
+        .then(() => {
+          fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i> Normal Ekran';
+        })
+        .catch(err => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+    } else {
+      document.exitFullscreen();
+      fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i> Tam Ekran';
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) {
+      fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i> Tam Ekran';
+    } else {
+      fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i> Normal Ekran';
+    }
+  });
+}
