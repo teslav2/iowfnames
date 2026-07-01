@@ -172,10 +172,10 @@ body {
 }
 
 .landing-card {
-  max-width: 780px; /* 2x larger layout width */
+  max-width: 860px; /* Scaled up card width */
   width: 100%;
   text-align: center;
-  padding: 4rem 4.5rem; /* Taller padding */
+  padding: 4.5rem 5.5rem; /* Larger padding */
   margin: auto 0;
   border-radius: 20px;
 }
@@ -185,12 +185,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  margin-bottom: 1.25rem;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .card-header-logo-img {
-  height: 48px;
+  height: 56px; /* Scaled up logo image */
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.3));
@@ -210,7 +210,7 @@ body {
 
 .welcome-text h2 {
   font-family: var(--font-display);
-  font-size: 2.8rem; /* 2x larger font */
+  font-size: 3.2rem; /* Scaled up title font */
   font-weight: 800;
   margin: 0;
   background: linear-gradient(135deg, #00d2ff 0%, #ff3860 100%);
@@ -222,9 +222,9 @@ body {
 
 .welcome-text p {
   color: var(--text-muted);
-  font-size: 1.15rem; /* Larger font */
+  font-size: 1.25rem; /* Scaled up description font */
   line-height: 1.6;
-  margin-bottom: 3rem;
+  margin-bottom: 3.2rem;
 }
 
 .form-group {
@@ -2378,6 +2378,18 @@ body {
 
 /* Mobile responsive optimizations for the game screen */
 @media (max-width: 800px) {
+  /* Mobile responsive overrides for the landing card */
+  .landing-card {
+    padding: 2.2rem 1.5rem !important;
+  }
+  .welcome-text h2 {
+    font-size: 2.2rem !important;
+  }
+  .welcome-text p {
+    font-size: 1rem !important;
+    margin-bottom: 2rem !important;
+  }
+
   /* Mobile responsive optimizations for the lobby screen */
   .lobby-new-layout {
     height: auto !important;
