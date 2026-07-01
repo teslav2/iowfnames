@@ -2334,6 +2334,85 @@ body {
   }
 }
 
+/* Mobile responsive optimizations for the game screen */
+@media (max-width: 800px) {
+  .game-3col {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    gap: 1rem !important;
+    padding: 0.5rem !important;
+  }
+
+  .game-center-col {
+    order: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .game-center-col .cards-grid {
+    aspect-ratio: 1 / 0.8 !important;
+    height: auto !important;
+    min-height: 280px !important;
+    gap: 0.3rem !important;
+  }
+
+  .game-left-col {
+    order: 2 !important;
+    height: auto !important;
+  }
+
+  .game-right-col {
+    order: 3 !important;
+    height: auto !important;
+  }
+
+  /* Automatically hide the game log and chat panels on mobile */
+  .game-log-panel,
+  .game-chat-panel {
+    display: none !important;
+  }
+
+  /* Automatically hide the emoji reaction bar on mobile */
+  .emoji-reaction-bar {
+    display: none !important;
+  }
+
+  /* Make card words smaller on mobile for better fit */
+  .card-word {
+    font-size: 0.58rem !important;
+  }
+
+  /* Scale down character badges on mobile */
+  .character-name-badge {
+    font-size: 0.45rem !important;
+    padding: 0.08rem 0.2rem !important;
+    top: 4px !important;
+    right: 4px !important;
+  }
+
+  /* Adjust topbar for mobile */
+  .game-topbar {
+    flex-direction: column !important;
+    height: auto !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+  }
+
+  .game-topbar-left, .game-topbar-right {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Floating emoji container position on mobile */
+  .floating-reactions-container {
+    bottom: 50px !important;
+    width: 280px !important;
+    height: 350px !important;
+  }
+}
+
 /* --- RENAME & PLAYER LAYOUT DETAILS --- */
 .edit-team-name-btn {
   background: transparent;

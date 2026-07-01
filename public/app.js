@@ -147,6 +147,8 @@ const winnerReasonText = document.getElementById('winner-reason-text');
 const btnGameoverRestart = document.getElementById('btn-gameover-restart');
 const btnGameoverLobby = document.getElementById('btn-gameover-lobby');
 const btnGameoverClose = document.getElementById('btn-gameover-close');
+const gameChatBox = document.getElementById('game-chat-box');
+const leaderChatBox = document.getElementById('leader-chat-box');
 
 // Defensive UI Helpers (Prevents JS crashes if elements are changed or missing)
 function safeSetHTML(el, html) {
@@ -562,7 +564,6 @@ if (lobbyChatForm) {
 let activeChatTab = 'genel';
 const tabGenel = document.getElementById('tab-genel');
 const tabLider = document.getElementById('tab-lider');
-const leaderChatBox = document.getElementById('leader-chat-box');
 
 if (tabGenel && tabLider) {
   tabGenel.addEventListener('click', () => {
@@ -622,8 +623,7 @@ function appendChatBubble(msg, type = 'genel') {
     }
 
     // Append to game chat if present
-    const gameChatBoxEl = document.getElementById('game-chat-box');
-    if (gameChatBoxEl) {
+    if (gameChatBox) {
       const bubbleGame = document.createElement('div');
       bubbleGame.className = `chat-bubble ${isMe ? 'my-msg' : ''} ${msg.team}-msg`;
       bubbleGame.innerHTML = `
@@ -631,12 +631,11 @@ function appendChatBubble(msg, type = 'genel') {
         <span class="chat-text">${escapeHTML(msg.text)}</span>
         <span class="chat-time">${msg.time}</span>
       `;
-      gameChatBoxEl.appendChild(bubbleGame);
-      gameChatBoxEl.scrollTop = gameChatBoxEl.scrollHeight;
+      gameChatBox.appendChild(bubbleGame);
+      gameChatBox.scrollTop = gameChatBox.scrollHeight;
     }
   } else if (type === 'lider') {
-    const leaderChatBoxEl = document.getElementById('leader-chat-box');
-    if (leaderChatBoxEl) {
+    if (leaderChatBox) {
       const bubbleLeader = document.createElement('div');
       bubbleLeader.className = `chat-bubble ${isMe ? 'my-msg' : ''} ${msg.team}-msg leader-exclusive`;
       bubbleLeader.innerHTML = `
@@ -644,8 +643,8 @@ function appendChatBubble(msg, type = 'genel') {
         <span class="chat-text">${escapeHTML(msg.text)}</span>
         <span class="chat-time">${msg.time}</span>
       `;
-      leaderChatBoxEl.appendChild(bubbleLeader);
-      leaderChatBoxEl.scrollTop = leaderChatBoxEl.scrollHeight;
+      leaderChatBox.appendChild(bubbleLeader);
+      leaderChatBox.scrollTop = leaderChatBox.scrollHeight;
     }
   }
 }
