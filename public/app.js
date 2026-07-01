@@ -914,10 +914,6 @@ function renderGame(gameState, playersList, roomSettings) {
       span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
       gameBlueAgents.appendChild(span);
     });
-
-    // Toggle 2-column layout when 10+ agents
-    gameRedAgents.classList.toggle('two-col', gameRedAgents.children.length >= 10);
-    gameBlueAgents.classList.toggle('two-col', gameBlueAgents.children.length >= 10);
   }
 
   // 4. View constraints

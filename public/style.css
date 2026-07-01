@@ -1010,12 +1010,23 @@ body {
 }
 
 /* Red / Blue active member lists */
-.spymaster-badge, .agent-tag {
+.spymaster-badge {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 6px;
   padding: 0.4rem 0.6rem;
   font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.agent-tag {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 0.3rem 0.45rem; /* Smaller padding */
+  font-size: 0.72rem; /* Smaller font-size */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1058,19 +1069,13 @@ body {
   margin-right: 0.15rem;
 }
 
-/* 2-column overflow for agent lists (10+ members) */
+/* 2-column layout for agent lists by default */
 #game-red-agents, #game-blue-agents {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-#game-red-agents.two-col, #game-blue-agents.two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.3rem;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .empty-state {
