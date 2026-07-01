@@ -350,7 +350,7 @@ body {
 }
 
 .lobby-middle-col .lobby-room-panel {
-  height: 250px;
+  height: 320px;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -2715,4 +2715,58 @@ body {
     opacity: 0;
     transform: translateY(-400px) scale(0.9) translateX(var(--drift-x)) rotate(calc(var(--rotate-deg) * 1.5));
   }
+}
+
+/* Header Action Buttons (Tam Ekran, Kurallar) Optimization */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.55rem 1.2rem !important;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1.5px) !important;
+}
+
+/* 2-Column Slots in Lobby for Agents & Spectators */
+#lobby-red-agents, 
+#lobby-blue-agents,
+#spectator-list {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0.35rem !important;
+  min-height: 35px !important;
+}
+
+#lobby-red-agents .empty-state, 
+#lobby-blue-agents .empty-state,
+#spectator-list .empty-state {
+  grid-column: span 2 !important;
+  text-align: center !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+#lobby-red-agents .player-item, 
+#lobby-blue-agents .player-item,
+#spectator-list .player-item {
+  font-size: 0.78rem !important;
+  padding: 0.3rem 0.45rem !important;
 }
