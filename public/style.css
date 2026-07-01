@@ -1380,7 +1380,7 @@ body {
   overflow: hidden;
 }
 
-.log-panel-header, .chat-panel-header {
+.log-panel-header {
   padding: 0.5rem 0.75rem;
   font-family: var(--font-display);
   font-size: 0.78rem;
@@ -1388,6 +1388,52 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   color: var(--text-muted);
   letter-spacing: 0.5px;
+}
+
+.chat-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.chat-tab-btn {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.chat-tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.chat-tab-btn.active {
+  color: var(--color-blue);
+  background: rgba(0, 210, 255, 0.05);
+  border-bottom: 2px solid var(--color-blue);
+}
+
+.chat-tab-btn#tab-lider.active {
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.05);
+  border-bottom: 2px solid #ffd700;
+}
+
+.chat-bubble.leader-exclusive {
+  border-left: 3px solid #ffd700 !important;
+  background: rgba(255, 215, 0, 0.01) !important;
 }
 
 .game-log-panel .log-messages,
@@ -2482,4 +2528,45 @@ body {
 
 .clue-popup-card.blue .clue-popup-team {
   color: var(--color-blue);
+}
+
+/* ============ FLOATING EMOJI REACTIONS ============ */
+.floating-reactions-container {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 500px;
+  overflow: visible;
+  pointer-events: none; /* Crucial! So it never blocks clicks on the word board cards */
+  z-index: 99999;
+}
+
+.floating-emoji-item {
+  position: absolute;
+  bottom: 0;
+  font-size: 2.5rem;
+  pointer-events: none; /* Crucial! Direct pass-through for mouse clicks */
+  opacity: 0;
+  user-select: none;
+  animation: emojiFloatUp 2s cubic-bezier(0.08, 0.82, 0.17, 1) forwards;
+}
+
+@keyframes emojiFloatUp {
+  0% {
+    transform: translateY(0) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-30px) scale(1.1) rotate(var(--rotate-deg));
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-400px) scale(0.9) translateX(var(--drift-x)) rotate(calc(var(--rotate-deg) * 1.5));
+  }
 }

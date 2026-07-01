@@ -915,6 +915,36 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 18.5. Send Leader Chat Message (Spymasters Only)
+  socket.on('sendLeaderChat', ({ text }) => {
+    try {
+      if (!currentRoomCode || !rooms[currentRoomCode]) return;
+      const room = rooms[currentRoomCode];
+      const player = room.players.find(p => p.id === socket.id);
+      if (!player) return;
+
+      // Only spymasters (liderler) can participate in leader chat
+      if (player.role !== 'spymaster') return;
+
+      const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      const msg = {
+        sender: player.name,
+        team: player.team,
+        text: text,
+        time: time
+      };
+
+      // Broadcast ONLY to the spymasters of this room
+      room.players.forEach(p => {
+        if (p.role === 'spymaster') {
+          io.to(p.id).emit('leaderChatMsg', msg);
+        }
+      });
+    } catch (e) {
+      console.error("sendLeaderChat error:", e);
+    }
+  });
+
   // 19. Team Name Customization (Host Only)
   socket.on('updateTeamName', ({ team, name }) => {
     try {

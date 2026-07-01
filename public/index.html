@@ -415,9 +415,17 @@
 
             <!-- Game Chat Panel -->
             <div class="game-chat-panel">
-              <div class="chat-panel-header"><i class="fa-solid fa-comments"></i> SOHBET</div>
-              <div class="chat-messages" id="game-chat-box">
+              <div class="chat-tabs" id="chat-tabs-container">
+                <button class="chat-tab-btn active" id="tab-genel" data-tab="genel"><i class="fa-solid fa-comments"></i> GENEL SOHBET</button>
+                <button class="chat-tab-btn" id="tab-lider" data-tab="lider" style="display: none;"><i class="fa-solid fa-crown"></i> LİDER SOHBETİ</button>
               </div>
+              
+              <!-- General Chat Box -->
+              <div class="chat-messages" id="game-chat-box"></div>
+              
+              <!-- Leader-Only Chat Box -->
+              <div class="chat-messages" id="leader-chat-box" style="display: none;"></div>
+              
               <form class="game-chat-form" id="game-chat-form" onsubmit="return false;">
                 <input type="text" id="game-chat-input" placeholder="Mesajınızı yazın..." maxlength="100" required autocomplete="off">
                 <button type="submit" class="game-chat-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
@@ -489,6 +497,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating emoji reactions container -->
+  <div id="floating-reactions-container" class="floating-reactions-container"></div>
 
   <!-- Socket.io library -->
   <script src="/socket.io/socket.io.js"></script>

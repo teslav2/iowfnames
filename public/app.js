@@ -55,6 +55,7 @@ let lastClueKey = '';
 let soundMuted = false;
 let roomCodeHidden = false;
 let winnerModalDismissed = false;
+let isAutoReconnecting = false;
 
 // DOM Elements - Screens
 const screenLanding = document.getElementById('screen-landing');
@@ -214,12 +215,19 @@ if (typeof io !== 'undefined') {
     const savedRoom = safeGetStorage('roomCode');
     const savedName = safeGetStorage('playerName');
     if (savedRoom && savedName) {
+      isAutoReconnecting = true;
       console.log(`Auto-reconnecting to room ${savedRoom} as ${savedName}...`);
       socket.emit('joinRoom', { roomCode: savedRoom, name: savedName, playerId: localPlayerId });
     }
   });
 
   socket.on('errorMsg', (msg) => {
+    if (isAutoReconnecting && msg.includes('Oda bulunamadı')) {
+      clearSavedSession();
+      isAutoReconnecting = false;
+      return;
+    }
+    isAutoReconnecting = false;
     alert(msg);
     // If room is not found, clear storage reconnect loop
     if (msg.includes('Oda bulunamadı')) {
@@ -245,6 +253,7 @@ if (typeof io !== 'undefined') {
     activeRoomCode = roomCode;
     myPlayerInfo = player;
     roomAdminId = player.id;
+    isAutoReconnecting = false;
 
     // Save session details
     safeSetStorage('roomCode', roomCode);
@@ -257,6 +266,7 @@ if (typeof io !== 'undefined') {
   socket.on('roomJoined', ({ roomCode, player }) => {
     activeRoomCode = roomCode;
     myPlayerInfo = player;
+    isAutoReconnecting = false;
 
     safeSetStorage('roomCode', roomCode);
     safeSetStorage('playerName', player.name);
@@ -316,11 +326,16 @@ if (typeof io !== 'undefined') {
   });
 
   socket.on('chatMsg', (msg) => {
-    appendChatBubble(msg);
+    appendChatBubble(msg, 'genel');
+  });
+
+  socket.on('leaderChatMsg', (msg) => {
+    appendChatBubble(msg, 'lider');
   });
 
   socket.on('emojiTriggered', ({ playerId, emoji }) => {
     triggerEmojiVisualEffect(playerId, emoji);
+    triggerFloatingEmoji(emoji);
   });
 }
 
@@ -543,6 +558,32 @@ if (lobbyChatForm) {
   });
 }
 
+// Chat Tabs and active state tracking
+let activeChatTab = 'genel';
+const tabGenel = document.getElementById('tab-genel');
+const tabLider = document.getElementById('tab-lider');
+const leaderChatBox = document.getElementById('leader-chat-box');
+
+if (tabGenel && tabLider) {
+  tabGenel.addEventListener('click', () => {
+    activeChatTab = 'genel';
+    tabGenel.classList.add('active');
+    tabLider.classList.remove('active');
+    if (gameChatBox) gameChatBox.style.display = 'flex';
+    if (leaderChatBox) leaderChatBox.style.display = 'none';
+    if (gameChatBox) gameChatBox.scrollTop = gameChatBox.scrollHeight;
+  });
+
+  tabLider.addEventListener('click', () => {
+    activeChatTab = 'lider';
+    tabLider.classList.add('active');
+    tabGenel.classList.remove('active');
+    if (leaderChatBox) leaderChatBox.style.display = 'flex';
+    if (gameChatBox) gameChatBox.style.display = 'none';
+    if (leaderChatBox) leaderChatBox.scrollTop = leaderChatBox.scrollHeight;
+  });
+}
+
 // Chat Form submit (Game screen)
 const gameChatForm = document.getElementById('game-chat-form');
 const gameChatInput = document.getElementById('game-chat-input');
@@ -553,40 +594,59 @@ if (gameChatForm) {
     if (!text) return;
 
     if (socket) {
-      socket.emit('sendChat', { text });
+      if (activeChatTab === 'lider') {
+        socket.emit('sendLeaderChat', { text });
+      } else {
+        socket.emit('sendChat', { text });
+      }
     }
     if (gameChatInput) gameChatInput.value = '';
   });
 }
 
-function appendChatBubble(msg) {
+function appendChatBubble(msg, type = 'genel') {
   const isMe = msg.sender === myPlayerInfo.name;
   
-  // Append to lobby chat if present
-  if (lobbyChatBox) {
-    const bubbleLobby = document.createElement('div');
-    bubbleLobby.className = `chat-bubble ${isMe ? 'my-msg' : ''} ${msg.team}-msg`;
-    bubbleLobby.innerHTML = `
-      <span class="chat-sender text-${msg.team}">${escapeHTML(msg.sender)}</span>
-      <span class="chat-text">${escapeHTML(msg.text)}</span>
-      <span class="chat-time">${msg.time}</span>
-    `;
-    lobbyChatBox.appendChild(bubbleLobby);
-    lobbyChatBox.scrollTop = lobbyChatBox.scrollHeight;
-  }
+  if (type === 'genel') {
+    // Append to lobby chat if present
+    if (lobbyChatBox) {
+      const bubbleLobby = document.createElement('div');
+      bubbleLobby.className = `chat-bubble ${isMe ? 'my-msg' : ''} ${msg.team}-msg`;
+      bubbleLobby.innerHTML = `
+        <span class="chat-sender text-${msg.team}">${escapeHTML(msg.sender)}</span>
+        <span class="chat-text">${escapeHTML(msg.text)}</span>
+        <span class="chat-time">${msg.time}</span>
+      `;
+      lobbyChatBox.appendChild(bubbleLobby);
+      lobbyChatBox.scrollTop = lobbyChatBox.scrollHeight;
+    }
 
-  // Append to game chat if present
-  const gameChatBox = document.getElementById('game-chat-box');
-  if (gameChatBox) {
-    const bubbleGame = document.createElement('div');
-    bubbleGame.className = `chat-bubble ${isMe ? 'my-msg' : ''} ${msg.team}-msg`;
-    bubbleGame.innerHTML = `
-      <span class="chat-sender text-${msg.team}">${escapeHTML(msg.sender)}</span>
-      <span class="chat-text">${escapeHTML(msg.text)}</span>
-      <span class="chat-time">${msg.time}</span>
-    `;
-    gameChatBox.appendChild(bubbleGame);
-    gameChatBox.scrollTop = gameChatBox.scrollHeight;
+    // Append to game chat if present
+    const gameChatBoxEl = document.getElementById('game-chat-box');
+    if (gameChatBoxEl) {
+      const bubbleGame = document.createElement('div');
+      bubbleGame.className = `chat-bubble ${isMe ? 'my-msg' : ''} ${msg.team}-msg`;
+      bubbleGame.innerHTML = `
+        <span class="chat-sender text-${msg.team}">${escapeHTML(msg.sender)}</span>
+        <span class="chat-text">${escapeHTML(msg.text)}</span>
+        <span class="chat-time">${msg.time}</span>
+      `;
+      gameChatBoxEl.appendChild(bubbleGame);
+      gameChatBoxEl.scrollTop = gameChatBoxEl.scrollHeight;
+    }
+  } else if (type === 'lider') {
+    const leaderChatBoxEl = document.getElementById('leader-chat-box');
+    if (leaderChatBoxEl) {
+      const bubbleLeader = document.createElement('div');
+      bubbleLeader.className = `chat-bubble ${isMe ? 'my-msg' : ''} ${msg.team}-msg leader-exclusive`;
+      bubbleLeader.innerHTML = `
+        <span class="chat-sender text-${msg.team}">👑 ${escapeHTML(msg.sender)}</span>
+        <span class="chat-text">${escapeHTML(msg.text)}</span>
+        <span class="chat-time">${msg.time}</span>
+      `;
+      leaderChatBoxEl.appendChild(bubbleLeader);
+      leaderChatBoxEl.scrollTop = leaderChatBoxEl.scrollHeight;
+    }
   }
 }
 
@@ -606,6 +666,35 @@ function triggerEmojiVisualEffect(playerId, emoji) {
       el.innerHTML = '';
     }, 3000);
   });
+}
+
+function triggerFloatingEmoji(emoji) {
+  const container = document.getElementById('floating-reactions-container');
+  if (!container) return;
+
+  const item = document.createElement('div');
+  item.className = 'floating-emoji-item';
+  item.textContent = emoji;
+
+  // Random positioning and scaling parameters for realistic floating feel
+  const randomLeft = 20 + Math.random() * 60; 
+  const randomDrift = (Math.random() - 0.5) * 100; 
+  const randomScale = 0.8 + Math.random() * 0.7; 
+  const randomRotate = (Math.random() - 0.5) * 50; 
+  const randomDuration = 1.6 + Math.random() * 0.6; 
+
+  item.style.left = `${randomLeft}%`;
+  item.style.setProperty('--drift-x', `${randomDrift}px`);
+  item.style.setProperty('--rotate-deg', `${randomRotate}deg`);
+  item.style.transform = `scale(${randomScale})`;
+  item.style.animationDuration = `${randomDuration}s`;
+
+  container.appendChild(item);
+
+  // Auto clean up after animation completes
+  setTimeout(() => {
+    item.remove();
+  }, randomDuration * 1000);
 }
 
 // --- ADMIN PLAYERS MANAGEMENT PANEL ---
@@ -914,6 +1003,20 @@ function renderGame(gameState, playersList, roomSettings) {
       span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
       gameBlueAgents.appendChild(span);
     });
+  }
+
+  // Sync leader chat tab visibility
+  const tabLiderEl = document.getElementById('tab-lider');
+  if (tabLiderEl) {
+    if (isSpymaster) {
+      tabLiderEl.style.display = 'flex';
+    } else {
+      tabLiderEl.style.display = 'none';
+      if (activeChatTab === 'lider') {
+        const tabGenelEl = document.getElementById('tab-genel');
+        if (tabGenelEl) tabGenelEl.click();
+      }
+    }
   }
 
   // 4. View constraints
