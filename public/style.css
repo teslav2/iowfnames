@@ -1035,6 +1035,44 @@ body {
   font-weight: bold;
 }
 
+/* Gold Leader Name with Glow */
+.leader-name-gold {
+  color: #ffd700;
+  font-weight: 800;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.5), 0 0 12px rgba(255, 215, 0, 0.3);
+  animation: leaderGoldPulse 3s infinite ease-in-out;
+}
+
+@keyframes leaderGoldPulse {
+  0%, 100% {
+    text-shadow: 0 0 4px rgba(255, 215, 0, 0.4), 0 0 8px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.7), 0 0 18px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* Role emoji icon */
+.role-emoji {
+  font-size: 1rem;
+  margin-right: 0.15rem;
+}
+
+/* 2-column overflow for agent lists (10+ members) */
+#game-red-agents, #game-blue-agents {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#game-red-agents.two-col, #game-blue-agents.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem;
+}
+
 .empty-state {
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -1620,13 +1658,20 @@ body {
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   border-radius: 8px;
 }
 
 /* 3D Flip Animasyonu */
 .card-item.revealed .card-inner {
   transform: rotateY(180deg);
+  animation: cardRevealGlow 0.8s ease-out;
+}
+
+@keyframes cardRevealGlow {
+  0% { filter: brightness(1); }
+  40% { filter: brightness(1.4) drop-shadow(0 0 15px rgba(255, 255, 255, 0.5)); }
+  100% { filter: brightness(1); }
 }
 
 /* %60 Yarı-Döndürülmüş Durum (Stage 2 - Kelime gösterimi) */
@@ -1723,19 +1768,19 @@ body {
 /* Karakter İsim Rozeti (Sağ Üst - Kapağa bağlı) */
 .character-name-badge {
   position: absolute;
-  top: 8px;
-  right: 10px;
+  top: 6px;
+  right: 6px;
   font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 0.72rem;
-  letter-spacing: 0.5px;
-  color: #fff;
+  font-weight: 700;
+  font-size: 0.55rem;
+  letter-spacing: 0.3px;
+  color: rgba(255, 255, 255, 0.7);
   z-index: 3;
   pointer-events: none;
-  background: rgba(8, 11, 17, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0.18rem 0.45rem;
-  border-radius: 4px;
+  background: rgba(8, 11, 17, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.12rem 0.35rem;
+  border-radius: 3px;
   animation: characterPulseGlow 3s infinite ease-in-out;
 }
 
@@ -2313,3 +2358,123 @@ body {
   box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
 }
 
+/* ============ CLUE POPUP ANIMATION ============ */
+.clue-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  transition: background 0.4s ease;
+}
+
+.clue-popup-overlay.show {
+  background: rgba(0, 0, 0, 0.55);
+  pointer-events: auto;
+}
+
+.clue-popup-overlay.hide {
+  background: rgba(0, 0, 0, 0);
+}
+
+.clue-popup-card {
+  text-align: center;
+  padding: 2.5rem 4rem;
+  border-radius: 20px;
+  background: rgba(10, 14, 22, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  transform: scale(0.3) translateY(80px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clue-popup-overlay.show .clue-popup-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.clue-popup-overlay.hide .clue-popup-card {
+  transform: scale(0.6) translateY(60px);
+  opacity: 0;
+  transition: all 0.5s ease-in;
+}
+
+/* Team-colored borders and glow */
+.clue-popup-card.red {
+  border-color: var(--color-red);
+  box-shadow: 0 0 50px rgba(255, 56, 96, 0.35), 0 0 100px rgba(255, 56, 96, 0.15);
+}
+
+.clue-popup-card.blue {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 50px rgba(0, 210, 255, 0.35), 0 0 100px rgba(0, 210, 255, 0.15);
+}
+
+.clue-popup-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-yellow);
+  margin-bottom: 1rem;
+  animation: popupLabelPulse 1s infinite alternate;
+}
+
+@keyframes popupLabelPulse {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+}
+
+.clue-popup-word {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  margin-bottom: 0.5rem;
+  animation: popupWordGlow 2s infinite alternate;
+}
+
+@keyframes popupWordGlow {
+  0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+  100% { text-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2); }
+}
+
+.clue-popup-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--color-yellow);
+  color: #000;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+.clue-popup-team {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+
+.clue-popup-card.red .clue-popup-team {
+  color: var(--color-red);
+}
+
+.clue-popup-card.blue .clue-popup-team {
+  color: var(--color-blue);
+}

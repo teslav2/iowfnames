@@ -113,13 +113,13 @@
                   </div>
                   
                   <button class="role-slot-btn select-role-btn" data-team="red" data-role="spymaster">
-                    <span class="role-title"><i class="fa-solid fa-user-tie"></i> Lider Ol</span>
+                    <span class="role-title">👑 Lider Ol</span>
                     <span class="role-desc">Gizli renkleri görür ve ipucu verir (Maks 1)</span>
                   </button>
                   <div id="lobby-red-spymaster" class="players-sublist empty">Lider Yok</div>
                   
                   <button class="role-slot-btn select-role-btn" data-team="red" data-role="agent">
-                    <span class="role-title"><i class="fa-solid fa-shield-halved"></i> Ekip Ol</span>
+                    <span class="role-title">👤 Ekip Ol</span>
                     <span class="role-desc">İpuçlarını yorumlayıp kartları seçer</span>
                   </button>
                   <div id="lobby-red-agents" class="players-sublist empty">Ekip Yok</div>
@@ -133,13 +133,13 @@
                   </div>
                   
                   <button class="role-slot-btn select-role-btn" data-team="blue" data-role="spymaster">
-                    <span class="role-title"><i class="fa-solid fa-user-tie"></i> Lider Ol</span>
+                    <span class="role-title">👑 Lider Ol</span>
                     <span class="role-desc">Gizli renkleri görür ve ipucu verir (Maks 1)</span>
                   </button>
                   <div id="lobby-blue-spymaster" class="players-sublist empty">Lider Yok</div>
                   
                   <button class="role-slot-btn select-role-btn" data-team="blue" data-role="agent">
-                    <span class="role-title"><i class="fa-solid fa-shield-halved"></i> Ekip Ol</span>
+                    <span class="role-title">👤 Ekip Ol</span>
                     <span class="role-desc">İpuçlarını yorumlayıp kartları seçer</span>
                   </button>
                   <div id="lobby-blue-agents" class="players-sublist empty">Ekip Yok</div>
@@ -148,7 +148,7 @@
 
               <!-- Spectator Option -->
               <button class="role-btn select-role-btn active mt-10 w-100" data-team="spectator" data-role="agent">
-                <i class="fa-solid fa-eye"></i> Gözcüler
+                👀 Gözcüler
               </button>
               <div id="spectator-list" class="players-sublist empty mt-10">Gözcü Yok</div>
             </div>
@@ -260,7 +260,7 @@
               <span id="timer-num">1:30</span>
             </div>
             <span class="turn-indicator" id="turn-indicator">
-              <i class="fa-solid fa-chess-pawn"></i> Sıradaki takım: <strong id="turn-team-name">---</strong>
+              <i class="fa-solid fa-chess-pawn"></i> <span id="turn-status-text">Sıradaki takım:</span> <strong id="turn-team-name">---</strong>
             </span>
           </div>
           <div class="game-topbar-right">
@@ -299,13 +299,13 @@
               </div>
               <div class="side-panel-members">
                 <div class="member-group">
-                  <div class="member-group-title"><i class="fa-solid fa-eye"></i> Lider</div>
+                  <div class="member-group-title">👑 Lider</div>
                   <div id="game-red-spymaster" class="member-list">
-                    <span class="spymaster-badge text-muted"><i class="fa-solid fa-eye-slash"></i> Lider Yok</span>
+                    <span class="spymaster-badge text-muted">👑 Lider Yok</span>
                   </div>
                 </div>
                 <div class="member-group">
-                  <div class="member-group-title"><i class="fa-solid fa-shield-halved"></i> Ekip</div>
+                  <div class="member-group-title">👤 Ekip</div>
                   <div id="game-red-agents" class="member-list">
                   </div>
                 </div>
@@ -382,13 +382,13 @@
               </div>
               <div class="side-panel-members">
                 <div class="member-group">
-                  <div class="member-group-title"><i class="fa-solid fa-eye"></i> Lider</div>
+                  <div class="member-group-title">👑 Lider</div>
                   <div id="game-blue-spymaster" class="member-list">
-                    <span class="spymaster-badge text-muted"><i class="fa-solid fa-eye-slash"></i> Lider Yok</span>
+                    <span class="spymaster-badge text-muted">👑 Lider Yok</span>
                   </div>
                 </div>
                 <div class="member-group">
-                  <div class="member-group-title"><i class="fa-solid fa-shield-halved"></i> Ekip</div>
+                  <div class="member-group-title">👤 Ekip</div>
                   <div id="game-blue-agents" class="member-list">
                   </div>
                 </div>
@@ -463,7 +463,10 @@
           <i class="fa-solid fa-arrow-rotate-left"></i> Yeni Oyun Başlat
         </button>
         <button id="btn-gameover-lobby" class="btn btn-secondary">
-          Lobiyi Görüntüle
+          Lobiye Dön
+        </button>
+        <button id="btn-gameover-close" class="btn btn-secondary">
+          <i class="fa-solid fa-eye"></i> Haritayı İncele
         </button>
       </div>
     </div>

@@ -51,8 +51,10 @@ let timerInterval = null;
 let timerSecondsRemaining = 90;
 let isUnlimitedTimer = false;
 let lastTurnStateKey = '';
+let lastClueKey = '';
 let soundMuted = false;
 let roomCodeHidden = false;
+let winnerModalDismissed = false;
 
 // DOM Elements - Screens
 const screenLanding = document.getElementById('screen-landing');
@@ -143,6 +145,7 @@ const winnerTeamText = document.getElementById('winner-team-text');
 const winnerReasonText = document.getElementById('winner-reason-text');
 const btnGameoverRestart = document.getElementById('btn-gameover-restart');
 const btnGameoverLobby = document.getElementById('btn-gameover-lobby');
+const btnGameoverClose = document.getElementById('btn-gameover-close');
 
 // Defensive UI Helpers (Prevents JS crashes if elements are changed or missing)
 function safeSetHTML(el, html) {
@@ -691,8 +694,8 @@ if (clueForm) {
     const word = inputClueWord ? inputClueWord.value.trim().toUpperCase() : '';
     const count = parseInt(inputClueCount ? inputClueCount.value : '1');
     
-    if (!word || word.includes(" ")) {
-      alert("İpucu tek kelime olmalıdır.");
+    if (!word) {
+      alert("İpucu boş olamaz.");
       return;
     }
 
@@ -741,6 +744,13 @@ if (btnGameoverLobby) {
   });
 }
 
+if (btnGameoverClose) {
+  btnGameoverClose.addEventListener('click', () => {
+    winnerModalDismissed = true;
+    if (gameoverModal) gameoverModal.classList.remove('active');
+  });
+}
+
 // Team Name blur listeners
 if (redTeamNameInput) {
   redTeamNameInput.addEventListener('blur', () => {
@@ -780,8 +790,8 @@ function renderLobbyPlayers(players) {
     div.setAttribute('data-player-row-id', p.id);
     
     let html = `<div class="player-name-wrap">
-                  <i class="fa-solid ${p.role === 'spymaster' ? 'fa-user-tie' : 'fa-shield-halved'}"></i>
-                  <span>${escapeHTML(p.name)}</span>
+                  <span class="role-emoji">${p.role === 'spymaster' ? '👑' : p.team === 'spectator' ? '👀' : '👤'}</span>
+                  <span class="${p.role === 'spymaster' ? 'leader-name-gold' : ''}">${escapeHTML(p.name)}</span>
                   ${p.isHost ? `<span class="host-badge"><i class="fa-solid fa-crown"></i> HOST</span>` : ''}
                   <span class="player-emoji-slot">${p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : ''}</span>
                 </div>`;
@@ -821,11 +831,19 @@ function renderGame(gameState, playersList, roomSettings) {
 
   // Sync turn indicator and room code in the top bar
   const turnTeamName = document.getElementById('turn-team-name');
+  const turnStatusText = document.getElementById('turn-status-text');
   if (turnTeamName) {
     const turnTeamDisplayName = turn.team === 'red'
       ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
       : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
-    turnTeamName.textContent = turnTeamDisplayName.toUpperCase();
+    
+    if (turn.role === 'spymaster') {
+      turnStatusText.textContent = `${turnTeamDisplayName} Lideri düşünüyor`;
+      turnTeamName.textContent = '🤔';
+    } else {
+      turnStatusText.textContent = `${turnTeamDisplayName} Ekibi seçiyor`;
+      turnTeamName.textContent = '🎯';
+    }
     
     const turnIndicator = document.getElementById('turn-indicator');
     if (turnIndicator) {
@@ -866,17 +884,17 @@ function renderGame(gameState, playersList, roomSettings) {
     const redSpy = playersList.find(p => p.team === 'red' && p.role === 'spymaster');
     if (redSpy) {
       const redSpyEmojiHTML = redSpy.emoji ? `<span class="emoji-reaction-bubble">${redSpy.emoji}</span>` : '';
-      gameRedSpymaster.innerHTML = `<span class="spymaster-badge" data-player-row-id="${redSpy.id}"><i class="fa-solid fa-eye text-yellow"></i> ${escapeHTML(redSpy.name)} <span class="player-emoji-slot">${redSpyEmojiHTML}</span></span>`;
+      gameRedSpymaster.innerHTML = `<span class="spymaster-badge" data-player-row-id="${redSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(redSpy.name)}</span> <span class="player-emoji-slot">${redSpyEmojiHTML}</span></span>`;
     } else {
-      gameRedSpymaster.innerHTML = `<span class="spymaster-badge text-muted"><i class="fa-solid fa-eye-slash"></i> Lider Yok</span>`;
+      gameRedSpymaster.innerHTML = `<span class="spymaster-badge text-muted">👑 Lider Yok</span>`;
     }
 
     const blueSpy = playersList.find(p => p.team === 'blue' && p.role === 'spymaster');
     if (blueSpy) {
       const blueSpyEmojiHTML = blueSpy.emoji ? `<span class="emoji-reaction-bubble">${blueSpy.emoji}</span>` : '';
-      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge" data-player-row-id="${blueSpy.id}"><i class="fa-solid fa-eye text-yellow"></i> ${escapeHTML(blueSpy.name)} <span class="player-emoji-slot">${blueSpyEmojiHTML}</span></span>`;
+      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge" data-player-row-id="${blueSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(blueSpy.name)}</span> <span class="player-emoji-slot">${blueSpyEmojiHTML}</span></span>`;
     } else {
-      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge text-muted"><i class="fa-solid fa-eye-slash"></i> Lider Yok</span>`;
+      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge text-muted">👑 Lider Yok</span>`;
     }
 
     playersList.filter(p => p.team === 'red' && p.role === 'agent').forEach(p => {
@@ -884,7 +902,7 @@ function renderGame(gameState, playersList, roomSettings) {
       span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''}`;
       span.setAttribute('data-player-row-id', p.id);
       const emojiHTML = p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : '';
-      span.innerHTML = `${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
+      span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
       gameRedAgents.appendChild(span);
     });
 
@@ -893,9 +911,13 @@ function renderGame(gameState, playersList, roomSettings) {
       span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''}`;
       span.setAttribute('data-player-row-id', p.id);
       const emojiHTML = p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : '';
-      span.innerHTML = `${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
+      span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
       gameBlueAgents.appendChild(span);
     });
+
+    // Toggle 2-column layout when 10+ agents
+    gameRedAgents.classList.toggle('two-col', gameRedAgents.children.length >= 10);
+    gameBlueAgents.classList.toggle('two-col', gameBlueAgents.children.length >= 10);
   }
 
   // 4. View constraints
@@ -922,6 +944,13 @@ function renderGame(gameState, playersList, roomSettings) {
       safeSetText(displayClueWord, turn.clue.word);
       safeSetText(displayClueCount, turn.clue.count === 0 ? "∞" : turn.clue.count);
       safeSetText(displayRemainingGuesses, `(Kalan Tahmin Hakları: ${turn.clue.remainingGuesses})`);
+
+      // Detect NEW clue and show popup
+      const newClueKey = `${turn.team}-${turn.clue.word}-${turn.clue.count}`;
+      if (newClueKey !== lastClueKey) {
+        lastClueKey = newClueKey;
+        showCluePopup(turn.clue.word, turn.clue.count === 0 ? "∞" : turn.clue.count, turn.team);
+      }
     } else {
       safeSetText(displayClueWord, "-----");
       safeSetText(displayClueCount, "-");
@@ -1005,35 +1034,64 @@ function renderGame(gameState, playersList, roomSettings) {
         clickedBy: card.clickedBy
       });
 
+      const wasRevealed = cardEl.classList.contains('revealed');
+      const isNowRevealed = card.revealed;
+      const isNewlyRevealed = !wasRevealed && isNowRevealed;
+
       const targetClassName = `card-item color-${card.color}` +
         (card.revealed ? ` revealed stage-${card.stage}` : '') +
         (isSpymasterView ? ' is-spymaster' : '');
-      
-      if (cardEl.className !== targetClassName) {
-        cardEl.className = targetClassName;
-      }
 
       if (cardEl.dataset.state !== cardStateString) {
         cardEl.dataset.state = cardStateString;
-        
-        let cardHTML = `
-          <div class="card-inner">
-            <div class="card-front">
-              <div class="thinking-container">${thinkingBubblesHTML}</div>
-              ${showConfirmBtn ? `<button class="confirm-reveal-btn" title="Kartı Aç"><i class="fa-solid fa-hand-pointer"></i> Aç</button>` : ''}
-              <span class="card-word">${escapeHTML(card.word)}</span>
-            </div>
-            
-            <div class="card-back">
+
+        // Build card-back HTML (character side)
+        const cardBackHTML = `
               <div class="card-character-cover" style="background-image: url('${card.characterImage}');">
                 <span class="character-name-badge">${escapeHTML(card.characterName || '')}</span>
               </div>
               <span class="card-word">${escapeHTML(card.word)}</span>
-              ${card.clickedBy ? `<span class="card-opened-by-tag">${escapeHTML(card.clickedBy)}</span>` : ''}
+              ${card.clickedBy ? `<span class="card-opened-by-tag">${escapeHTML(card.clickedBy)}</span>` : ''}`;
+
+        // Build card-front HTML (closed side)
+        const cardFrontHTML = `
+              <div class="thinking-container">${thinkingBubblesHTML}</div>
+              ${showConfirmBtn ? `<button class="confirm-reveal-btn" title="Kartı Aç"><i class="fa-solid fa-hand-pointer"></i> Aç</button>` : ''}
+              <span class="card-word">${escapeHTML(card.word)}</span>`;
+
+        if (isNewlyRevealed) {
+          // FLIP ANIMATION: update back content first, then flip via class
+          const cardInner = cardEl.querySelector('.card-inner');
+          if (cardInner) {
+            const cardBack = cardInner.querySelector('.card-back');
+            if (cardBack) cardBack.innerHTML = cardBackHTML;
+            const cardFront = cardInner.querySelector('.card-front');
+            if (cardFront) cardFront.innerHTML = cardFrontHTML;
+          }
+          // Apply class in next frame so CSS transition triggers
+          requestAnimationFrame(() => {
+            cardEl.className = targetClassName;
+          });
+        } else {
+          // Normal rebuild (no animation needed)
+          cardEl.className = targetClassName;
+          cardEl.innerHTML = `
+            <div class="card-inner">
+              <div class="card-front">
+                ${cardFrontHTML}
+              </div>
+              
+              <div class="card-back">
+                ${cardBackHTML}
+              </div>
             </div>
-          </div>
-        `;
-        cardEl.innerHTML = cardHTML;
+          `;
+        }
+      } else {
+        // Only update className if it changed (no innerHTML change)
+        if (cardEl.className !== targetClassName) {
+          cardEl.className = targetClassName;
+        }
       }
 
       if (cardEl._clickHandler) {
@@ -1132,12 +1190,13 @@ function renderGame(gameState, playersList, roomSettings) {
     }
     safeSetText(winnerReasonText, `${wTeamName} tüm kelimeleri bularak oyunu kazandı!`);
     
-    if (gameoverModal && !gameoverModal.classList.contains('active')) {
+    if (gameoverModal && !gameoverModal.classList.contains('active') && !winnerModalDismissed) {
       playLocalSound('victory');
       gameoverModal.classList.add('active');
     }
     stopTimer();
   } else {
+    winnerModalDismissed = false; // Reset dismiss flag when game resets
     if (gameoverModal) gameoverModal.classList.remove('active');
   }
 }
@@ -1273,3 +1332,45 @@ window.addEventListener('DOMContentLoaded', () => {
     roomCodeInput.value = roomCodeQuery.toUpperCase();
   }
 });
+
+// ============ CLUE POPUP ANIMATION ============
+function showCluePopup(word, count, team) {
+  // Remove any existing popup
+  const existing = document.querySelector('.clue-popup-overlay');
+  if (existing) existing.remove();
+
+  const teamColor = team === 'red' ? '#ff3860' : '#00d2ff';
+  const teamGlow = team === 'red' ? 'rgba(255, 56, 96, 0.6)' : 'rgba(0, 210, 255, 0.6)';
+  const teamLabel = team === 'red' ? 'KIRMIZI' : 'MAVİ';
+
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'clue-popup-overlay';
+
+  // Create popup card
+  overlay.innerHTML = `
+    <div class="clue-popup-card ${team}">
+      <div class="clue-popup-label">💡 İPUCU VERİLDİ!</div>
+      <div class="clue-popup-word">${escapeHTML(word.toUpperCase())}</div>
+      <div class="clue-popup-count">${count}</div>
+      <div class="clue-popup-team">${teamLabel} TAKIM LİDERİ</div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Trigger entrance animation (next frame)
+  requestAnimationFrame(() => {
+    overlay.classList.add('show');
+  });
+
+  // After 3 seconds, animate out
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    overlay.classList.add('hide');
+    // Remove from DOM after exit animation
+    setTimeout(() => {
+      overlay.remove();
+    }, 600);
+  }, 3000);
+}
