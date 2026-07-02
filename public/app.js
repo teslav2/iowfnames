@@ -52,6 +52,8 @@ let timerSecondsRemaining = 90;
 let isUnlimitedTimer = false;
 let lastTurnStateKey = '';
 let lastClueKey = '';
+let lastTurnTeam = '';
+let lastTurnRole = '';
 let soundMuted = false;
 let roomCodeHidden = false;
 let winnerModalDismissed = false;
@@ -204,6 +206,29 @@ function playLocalSound(type) {
         o.start(ctx.currentTime + i * 0.08);
         o.stop(ctx.currentTime + i * 0.08 + 0.25);
       });
+    } else if (type === 'turn-change-my') {
+      const now = ctx.currentTime;
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.005, now + 0.4);
+      osc.start();
+      osc.stop(now + 0.4);
+    } else if (type === 'turn-change-other') {
+      const now = ctx.currentTime;
+      osc.frequency.setValueAtTime(329.63, now);
+      osc.frequency.exponentialRampToValueAtTime(440.00, now + 0.12);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.005, now + 0.3);
+      osc.start();
+      osc.stop(now + 0.3);
+    } else if (type === 'time-warning') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(880.00, ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
     }
   } catch (e) {}
 }
@@ -315,6 +340,9 @@ if (typeof io !== 'undefined') {
       switchScreen(screenGame);
       renderGame(roomData.gameState, roomData.players, roomData.settings);
     } else {
+      // Reset turn tracking variables when back in lobby
+      lastTurnTeam = '';
+      lastTurnRole = '';
       switchScreen(screenLobby);
     }
   });
@@ -324,6 +352,11 @@ if (typeof io !== 'undefined') {
     timerSecondsRemaining = remaining;
     if (!isUnlimitedTimer) {
       updateTimerUI(timerSecondsRemaining, parseInt((turnDurationSelect && turnDurationSelect.value) || 90));
+      
+      // Play warning sound in final 5 seconds
+      if (remaining <= 5 && remaining > 0) {
+        playLocalSound('time-warning');
+      }
     }
   });
 
@@ -906,6 +939,23 @@ function renderLobbyPlayers(players) {
 // --- GAMEPLAY SCREEN RENDERER ---
 function renderGame(gameState, playersList, roomSettings) {
   const turn = gameState.currentTurn;
+
+  // Turn Change Audio Feedback
+  if (lastTurnTeam !== turn.team || lastTurnRole !== turn.role) {
+    const isFirstRun = lastTurnTeam === '';
+    lastTurnTeam = turn.team;
+    lastTurnRole = turn.role;
+
+    if (!isFirstRun) {
+      const isMyTurn = myPlayerInfo.team === turn.team && myPlayerInfo.role === turn.role;
+      if (isMyTurn) {
+        playLocalSound('turn-change-my');
+      } else {
+        playLocalSound('turn-change-other');
+      }
+    }
+  }
+
   const isMyTeamTurn = myPlayerInfo.team === turn.team;
   const isMyRole = myPlayerInfo.role === turn.role;
   const isAgent = myPlayerInfo.role === 'agent';
@@ -919,11 +969,15 @@ function renderGame(gameState, playersList, roomSettings) {
       ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
       : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
     
+    const teamSpan = turn.team === 'red'
+      ? `<span class="text-red">${escapeHTML(turnTeamDisplayName)}</span>`
+      : `<span class="text-blue">${escapeHTML(turnTeamDisplayName)}</span>`;
+
     if (turn.role === 'spymaster') {
-      turnStatusText.textContent = `${turnTeamDisplayName} Lideri düşünüyor`;
+      turnStatusText.innerHTML = `${teamSpan} Lideri düşünüyor`;
       turnTeamName.textContent = '🤔';
     } else {
-      turnStatusText.textContent = `${turnTeamDisplayName} Ekibi seçiyor`;
+      turnStatusText.innerHTML = `${teamSpan} Ekibi seçiyor`;
       turnTeamName.textContent = '🎯';
     }
     

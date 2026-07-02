@@ -2833,3 +2833,12 @@ body {
   font-size: 0.78rem !important;
   padding: 0.3rem 0.45rem !important;
 }
+
+/* Global Team Color Utility Classes */
+.text-red {
+  color: var(--color-red) !important;
+}
+
+.text-blue {
+  color: var(--color-blue) !important;
+}
