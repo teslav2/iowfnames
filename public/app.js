@@ -1142,8 +1142,7 @@ function renderGame(gameState, playersList, roomSettings) {
               <div class="card-character-cover" style="background-image: url('${card.characterImage}');">
                 <span class="character-name-badge">${escapeHTML(card.characterName || '')}</span>
               </div>
-              <span class="card-word">${escapeHTML(card.word)}</span>
-              ${card.clickedBy ? `<span class="card-opened-by-tag">${escapeHTML(card.clickedBy)}</span>` : ''}`;
+              <span class="card-word">${escapeHTML(card.word)}</span>`;
 
         // Build card-front HTML (closed side)
         const cardFrontHTML = `
