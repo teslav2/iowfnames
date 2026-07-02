@@ -1565,8 +1565,18 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (roomCodeQuery && roomCodeQuery.length === 6 && roomCodeInput) {
-    roomCodeInput.value = roomCodeQuery.toUpperCase();
+  if (roomCodeQuery && roomCodeQuery.length === 6) {
+    if (roomCodeInput) roomCodeInput.value = roomCodeQuery.toUpperCase();
+    
+    // Auto-join as a guest spectator with a unique temporary name so we can render the lobby in the background
+    const tempGuestName = `Katılımcı#${Math.floor(1000 + Math.random() * 9000)}`;
+    if (socket) {
+      socket.emit('joinRoom', { roomCode: roomCodeQuery.toUpperCase(), name: tempGuestName, playerId: localPlayerId });
+    }
+    
+    // Show the guest username modal prompt overlay
+    const modal = document.getElementById('username-modal-overlay');
+    if (modal) modal.style.display = 'flex';
   }
 });
 
@@ -1672,3 +1682,42 @@ infoTabBtns.forEach(btn => {
     if (targetContent) targetContent.classList.add('active');
   });
 });
+
+// ============ GUEST USERNAME PROMPT MODAL ============
+const usernameModalOverlay = document.getElementById('username-modal-overlay');
+const modalUsernameInput = document.getElementById('modal-username-input');
+const modalJoinBtn = document.getElementById('modal-join-btn');
+
+function submitGuestUsername() {
+  if (!modalUsernameInput) return;
+  const name = modalUsernameInput.value.trim();
+  if (!name) {
+    alert("Lütfen geçerli bir takma ad girin.");
+    return;
+  }
+  
+  if (socket) {
+    socket.emit('changeName', { name });
+  }
+}
+
+if (modalJoinBtn) {
+  modalJoinBtn.addEventListener('click', submitGuestUsername);
+}
+
+if (modalUsernameInput) {
+  modalUsernameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      submitGuestUsername();
+    }
+  });
+}
+
+// Hide modal on successful name registration
+if (socket) {
+  socket.on('nameChangeSuccess', () => {
+    if (usernameModalOverlay) {
+      usernameModalOverlay.style.display = 'none';
+    }
+  });
+}

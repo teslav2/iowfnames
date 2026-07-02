@@ -514,6 +514,33 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 3.7. Change Player Name (For guest links)
+  socket.on('changeName', ({ name }) => {
+    try {
+      if (!currentRoomCode || !rooms[currentRoomCode]) return;
+      const room = rooms[currentRoomCode];
+      const player = room.players.find(p => p.id === socket.id);
+      if (!player) return;
+
+      const nameClean = name ? name.trim() : '';
+      if (!nameClean) {
+        return socket.emit('errorMsg', 'Lütfen geçerli bir takma ad girin.');
+      }
+      
+      const duplicateName = room.players.find(p => p.name.toUpperCase() === nameClean.toUpperCase() && p.id !== socket.id && !p.isBot);
+      if (duplicateName) {
+        return socket.emit('errorMsg', 'Bu isimde başka bir oyuncu odada zaten mevcut.');
+      }
+
+      player.name = nameClean;
+      
+      io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
+      socket.emit('nameChangeSuccess');
+    } catch (e) {
+      console.error("changeName error:", e);
+    }
+  });
+
   // 4. Update Game Settings (Host Only)
   socket.on('updateSettings', ({ turnDuration, maxPlayers }) => {
     try {

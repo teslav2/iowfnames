@@ -653,6 +653,31 @@
     </div>
   </div>
 
+  <!-- Guest Username Prompt Modal -->
+  <div class="modal-overlay" id="username-modal-overlay" style="display: none;">
+    <div class="glass-panel modal-content username-card">
+      <div class="winner-icon" style="background: rgba(0, 210, 255, 0.15); color: var(--color-blue); margin-bottom: 1.5rem;">
+        <i class="fa-solid fa-user-tag"></i>
+      </div>
+      <h2>LOBİYE KATIL</h2>
+      <p id="username-modal-subtitle" style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.4; text-align: center;">
+        Odaya giriş yapmak için bir takma ad belirleyin.
+      </p>
+      
+      <div class="form-group" style="width: 100%; text-align: left; margin: 1.5rem 0 1rem 0;">
+        <label for="modal-username-input">Takma Adınız</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" id="modal-username-input" placeholder="İsminizi girin..." maxlength="15">
+        </div>
+      </div>
+      
+      <button id="modal-join-btn" class="btn btn-primary btn-glow w-100">
+        Lobiye Giriş Yap <i class="fa-solid fa-right-to-bracket"></i>
+      </button>
+    </div>
+  </div>
+
   <!-- Floating emoji reactions container -->
   <div id="floating-reactions-container" class="floating-reactions-container"></div>
 

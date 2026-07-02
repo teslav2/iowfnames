@@ -199,6 +199,40 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.card-logo-header h2 {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  background: linear-gradient(
+    90deg, 
+    #ff2a5f 0%, 
+    #ff2a5f 30%, 
+    #ffffff 48%, 
+    #ffffff 52%, 
+    #00d2ff 70%, 
+    #00d2ff 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.3)) drop-shadow(0 0 3px rgba(255, 42, 95, 0.3));
+  animation: textShimmer 4s infinite linear;
+  margin: 0;
+  user-select: none;
+}
+
+@keyframes textShimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
 .card-header-logo-img {
   height: 56px; /* Scaled up logo image */
   width: auto;
@@ -3263,4 +3297,13 @@ body {
   animation: leaderGoldPulse 3s infinite ease-in-out;
   white-space: nowrap;
   letter-spacing: 0.5px;
+}
+
+/* Guest Username modal styling */
+.username-card {
+  max-width: 400px !important;
+  padding: 2.5rem !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(0, 210, 255, 0.25) !important;
+  box-shadow: 0 0 25px rgba(0, 210, 255, 0.15) !important;
 }
