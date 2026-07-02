@@ -1576,7 +1576,13 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Show the guest username modal prompt overlay
     const modal = document.getElementById('username-modal-overlay');
-    if (modal) modal.classList.add('active');
+    if (modal) {
+      modal.classList.add('active');
+      setTimeout(() => {
+        const input = document.getElementById('modal-username-input');
+        if (input) input.focus();
+      }, 150);
+    }
   }
 });
 
@@ -1718,6 +1724,11 @@ if (socket) {
   socket.on('nameChangeSuccess', () => {
     if (usernameModalOverlay) {
       usernameModalOverlay.classList.remove('active');
+    }
+    // Update player name in saved session details
+    if (modalUsernameInput) {
+      const name = modalUsernameInput.value.trim();
+      safeSetStorage('playerName', name);
     }
   });
 }
