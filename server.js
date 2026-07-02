@@ -322,7 +322,9 @@ io.on('connection', (socket) => {
         isHost: true,
         isBot: false,
         connected: true,
-        emoji: null
+        emoji: null,
+        ready: true,
+        glow: 'none'
       };
 
       rooms[roomCode].players.push(playerInfo);
@@ -382,6 +384,9 @@ io.on('connection', (socket) => {
         playerInfo.id = socket.id; // Update socket ID
         playerInfo.connected = true;
         playerInfo.name = nameClean; // Sync name in case it changed
+        if (!playerInfo.isHost) {
+          playerInfo.ready = false; // Reset ready status on reconnect
+        }
         if (playerInfo.isHost) {
           room.hostId = socket.id;
         }
@@ -403,7 +408,9 @@ io.on('connection', (socket) => {
           isHost: false,
           isBot: false,
           connected: true,
-          emoji: null
+          emoji: null,
+          ready: false,
+          glow: 'none'
         };
         
         room.players.push(playerInfo);
@@ -450,10 +457,49 @@ io.on('connection', (socket) => {
 
       player.team = team;
       player.role = role;
+      if (!player.isHost) {
+        player.ready = false;
+      }
 
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
     } catch (e) {
       console.error("selectTeamRole error:", e);
+    }
+  });
+
+  // 3.5. Toggle Ready Status (For active team players)
+  socket.on('toggleReady', () => {
+    try {
+      if (!currentRoomCode || !rooms[currentRoomCode]) return;
+      const room = rooms[currentRoomCode];
+      const player = room.players.find(p => p.id === socket.id);
+      if (!player) return;
+
+      // Only team players who are not the host need to toggle ready
+      if (player.team !== 'spectator' && !player.isHost) {
+        player.ready = !player.ready;
+        io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
+      }
+    } catch (e) {
+      console.error("toggleReady error:", e);
+    }
+  });
+
+  // 3.6. Update Namecard Glow Color
+  socket.on('updateGlow', ({ glow }) => {
+    try {
+      if (!currentRoomCode || !rooms[currentRoomCode]) return;
+      const room = rooms[currentRoomCode];
+      const player = room.players.find(p => p.id === socket.id);
+      if (!player) return;
+
+      const validGlows = ['none', 'gold', 'purple', 'green', 'cyan', 'pink'];
+      if (validGlows.includes(glow)) {
+        player.glow = glow;
+        io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
+      }
+    } catch (e) {
+      console.error("updateGlow error:", e);
     }
   });
 
@@ -613,6 +659,13 @@ io.on('connection', (socket) => {
         return socket.emit('errorMsg', 'Oyuna başlamak için her iki takımda da en az 1 Lider olmalıdır!');
       }
 
+      // Check ready status for all active team players (excluding host/bots)
+      const unreadyPlayers = room.players.filter(p => p.team !== 'spectator' && !p.isHost && !p.isBot && !p.ready);
+      if (unreadyPlayers.length > 0) {
+        const names = unreadyPlayers.map(p => p.name).join(', ');
+        return socket.emit('errorMsg', `Oyuna başlamak için tüm aktif oyuncuların hazır olması gerekir. Hazır olmayanlar: ${names}`);
+      }
+
       initGame(room);
       startServerTimer(currentRoomCode);
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
@@ -627,6 +680,12 @@ io.on('connection', (socket) => {
       if (!currentRoomCode || !rooms[currentRoomCode]) return;
       const room = rooms[currentRoomCode];
       if (!isHost(room)) return socket.emit('errorMsg', 'Test modunu sadece lider başlatabilir.');
+
+      // Enforce username validation for 'Teslav2' or 'Tesla.v2' (case-insensitive) on the server side
+      const player = room.players.find(p => p.id === socket.id);
+      if (!player || (player.name.toLowerCase() !== 'teslav2' && player.name.toLowerCase() !== 'tesla.v2')) {
+        return socket.emit('errorMsg', 'Test modunu başlatma yetkiniz yok.');
+      }
 
       // Clear existing dummy bots first to avoid clutter
       room.players = room.players.filter(p => !p.isBot);

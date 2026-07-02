@@ -322,7 +322,12 @@ if (typeof io !== 'undefined') {
     const isAdmin = socket.id === roomAdminId;
     safeSetDisplay(lobbyAdminControls, isAdmin ? 'block' : 'none');
     safeSetDisplay(startGameBtn, isAdmin ? 'block' : 'none');
-    safeSetDisplay(testModeBtn, isAdmin ? 'block' : 'none');
+
+    // Test mode button is only visible to the host if their username is 'Teslav2' or 'Tesla.v2' (case-insensitive)
+    const isTeslaName = myPlayerInfo && myPlayerInfo.name && 
+      (myPlayerInfo.name.toLowerCase() === 'teslav2' || myPlayerInfo.name.toLowerCase() === 'tesla.v2');
+    safeSetDisplay(testModeBtn, (isAdmin && isTeslaName) ? 'block' : 'none');
+
     safeSetDisplay(btnRestartGame, isAdmin ? 'block' : 'none');
     safeSetDisplay(btnResetLobby, isAdmin ? 'block' : 'none');
     safeSetDisplay(document.getElementById('btn-edit-red-team'), isAdmin ? 'inline-block' : 'none');
@@ -332,6 +337,17 @@ if (typeof io !== 'undefined') {
     if (!isAdmin && roomData.settings) {
       safeSetValue(turnDurationSelect, roomData.settings.turnDuration);
       safeSetValue(maxPlayersSelect, roomData.settings.maxPlayers);
+    }
+
+    // Sync Glow Picker active state for current player
+    if (myPlayerInfo && myPlayerInfo.glow) {
+      document.querySelectorAll('.glow-opt-btn').forEach(btn => {
+        if (btn.dataset.glow === myPlayerInfo.glow) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
     }
 
     // Sync Ready Button for regular team players
@@ -358,6 +374,10 @@ if (typeof io !== 'undefined') {
       // Reset turn tracking variables when back in lobby
       lastTurnTeam = '';
       lastTurnRole = '';
+      const glowBg = document.querySelector('.glow-bg');
+      if (glowBg) {
+        glowBg.classList.remove('turn-red', 'turn-blue');
+      }
       switchScreen(screenLobby);
     }
   });
@@ -515,6 +535,16 @@ if (shuffleTeamsBtn) {
     if (socket) socket.emit('shuffleTeams');
   });
 }
+
+// Glow Color options selection listener
+document.querySelectorAll('.glow-opt-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const selectedGlow = e.currentTarget.dataset.glow;
+    if (socket) {
+      socket.emit('updateGlow', { glow: selectedGlow });
+    }
+  });
+});
 
 // Edit team name buttons in lobby
 const btnEditRedTeam = document.getElementById('btn-edit-red-team');
@@ -758,7 +788,7 @@ function renderLobbyPlayersAdminList(players) {
 
   players.forEach(p => {
     const row = document.createElement('div');
-    row.className = `lobby-user-row ${p.playerId === localPlayerId ? 'me' : ''}`;
+    row.className = `lobby-user-row ${p.playerId === localPlayerId ? 'me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
     row.setAttribute('data-player-row-id', p.id);
 
     let teamName = p.team === 'red' ? 'Kırmızı' : p.team === 'blue' ? 'Mavi' : 'Gözcü';
@@ -922,18 +952,29 @@ function renderLobbyPlayers(players) {
 
   players.forEach(p => {
     const div = document.createElement('div');
-    div.className = `player-item team-${p.team} ${p.playerId === localPlayerId ? 'me' : ''}`;
+    div.className = `player-item team-${p.team} ${p.playerId === localPlayerId ? 'me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
     div.setAttribute('data-player-row-id', p.id);
     
+    let nameClass = '';
+    if (p.role === 'spymaster') {
+      nameClass = 'leader-name-gold';
+    } else if (p.team === 'red') {
+      nameClass = 'name-red';
+    } else if (p.team === 'blue') {
+      nameClass = 'name-blue';
+    } else {
+      nameClass = 'name-gray';
+    }
+
     let html = `<div class="player-name-wrap">
                   <span class="role-emoji">${p.role === 'spymaster' ? '👑' : p.team === 'spectator' ? '👀' : '👤'}</span>
-                  <span class="${p.role === 'spymaster' ? 'leader-name-gold' : ''}">${escapeHTML(p.name)}</span>
+                  <span class="${nameClass}">${escapeHTML(p.name)}</span>
                   ${p.isHost ? `<span class="host-badge"><i class="fa-solid fa-crown"></i> HOST</span>` : ''}
                   <span class="player-emoji-slot">${p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : ''}</span>
                 </div>`;
     
-    // Add Ready badge for team players who are not the host
-    if (p.team !== 'spectator' && !p.isHost) {
+    // Add Ready badge for all team players (including host)
+    if (p.team !== 'spectator') {
       if (p.ready) {
         html += `<span class="ready-badge ready"><i class="fa-solid fa-circle-check"></i> Hazır</span>`;
       } else {
@@ -969,6 +1010,18 @@ function renderLobbyPlayers(players) {
 // --- GAMEPLAY SCREEN RENDERER ---
 function renderGame(gameState, playersList, roomSettings) {
   const turn = gameState.currentTurn;
+
+  // Sync background color based on active team turn
+  const glowBgEl = document.querySelector('.glow-bg');
+  if (glowBgEl) {
+    if (turn.team === 'red') {
+      glowBgEl.classList.add('turn-red');
+      glowBgEl.classList.remove('turn-blue');
+    } else if (turn.team === 'blue') {
+      glowBgEl.classList.add('turn-blue');
+      glowBgEl.classList.remove('turn-red');
+    }
+  }
 
   // Turn Change Audio Feedback
   if (lastTurnTeam !== turn.team || lastTurnRole !== turn.role) {
@@ -1050,7 +1103,7 @@ function renderGame(gameState, playersList, roomSettings) {
     const redSpy = playersList.find(p => p.team === 'red' && p.role === 'spymaster');
     if (redSpy) {
       const redSpyEmojiHTML = redSpy.emoji ? `<span class="emoji-reaction-bubble">${redSpy.emoji}</span>` : '';
-      gameRedSpymaster.innerHTML = `<span class="spymaster-badge" data-player-row-id="${redSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(redSpy.name)}</span> <span class="player-emoji-slot">${redSpyEmojiHTML}</span></span>`;
+      gameRedSpymaster.innerHTML = `<span class="spymaster-badge ${redSpy.glow ? 'glow-' + redSpy.glow : ''}" data-player-row-id="${redSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(redSpy.name)}</span> <span class="player-emoji-slot">${redSpyEmojiHTML}</span></span>`;
     } else {
       gameRedSpymaster.innerHTML = `<span class="spymaster-badge text-muted">👑 Lider Yok</span>`;
     }
@@ -1058,14 +1111,14 @@ function renderGame(gameState, playersList, roomSettings) {
     const blueSpy = playersList.find(p => p.team === 'blue' && p.role === 'spymaster');
     if (blueSpy) {
       const blueSpyEmojiHTML = blueSpy.emoji ? `<span class="emoji-reaction-bubble">${blueSpy.emoji}</span>` : '';
-      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge" data-player-row-id="${blueSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(blueSpy.name)}</span> <span class="player-emoji-slot">${blueSpyEmojiHTML}</span></span>`;
+      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge ${blueSpy.glow ? 'glow-' + blueSpy.glow : ''}" data-player-row-id="${blueSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(blueSpy.name)}</span> <span class="player-emoji-slot">${blueSpyEmojiHTML}</span></span>`;
     } else {
       gameBlueSpymaster.innerHTML = `<span class="spymaster-badge text-muted">👑 Lider Yok</span>`;
     }
 
     playersList.filter(p => p.team === 'red' && p.role === 'agent').forEach(p => {
       const span = document.createElement('span');
-      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''}`;
+      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
       span.setAttribute('data-player-row-id', p.id);
       const emojiHTML = p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : '';
       span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
@@ -1074,7 +1127,7 @@ function renderGame(gameState, playersList, roomSettings) {
 
     playersList.filter(p => p.team === 'blue' && p.role === 'agent').forEach(p => {
       const span = document.createElement('span');
-      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''}`;
+      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
       span.setAttribute('data-player-row-id', p.id);
       const emojiHTML = p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : '';
       span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
@@ -1593,3 +1646,20 @@ if (feedbackTrigger && feedbackDrawer) {
     }
   });
 }
+
+// ============ LANDING INFO PANEL TAB SWITCHER ============
+const infoTabBtns = document.querySelectorAll('.info-tab-btn');
+infoTabBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabId = btn.dataset.tab;
+    
+    // Remove active from all buttons and contents
+    infoTabBtns.forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.info-tab-content').forEach(c => c.classList.remove('active'));
+    
+    // Add active to current
+    btn.classList.add('active');
+    const targetContent = document.getElementById(`tab-${tabId}`);
+    if (targetContent) targetContent.classList.add('active');
+  });
+});

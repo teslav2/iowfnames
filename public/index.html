@@ -69,40 +69,108 @@
       
       <!-- 1. LANDING SCREEN -->
       <section id="screen-landing" class="screen active" style="opacity: 1;">
-        <div class="glass-panel landing-card">
-          <div class="welcome-text">
-            <div class="card-logo-header">
-              <img src="/logos/logo.png" alt="Logo" class="card-header-logo-img">
-              <h2>IOWFNAMES</h2>
-              <img src="/logos/logo.png" alt="Logo" class="card-header-logo-img">
-            </div>
-            <p>IOWFNAMES Kelimelerin ardındaki gizli bağlantıları keşfedin.<br>
-            Takımınızı zafere taşıyın. Tek ipucu. Sayısız ihtimal.</p>
-          </div>
+        <div class="landing-layout-grid">
           
-          <div class="form-group">
-            <label for="username-input">Takma Adınız</label>
-            <div class="input-wrapper">
-              <i class="fa-solid fa-user"></i>
-              <input type="text" id="username-input" placeholder="İsminizi girin..." maxlength="15" value="">
+          <!-- LEFT COLUMN: INFO PANEL -->
+          <div class="glass-panel landing-info-panel">
+            <div class="info-tabs">
+              <button class="info-tab-btn active" data-tab="howtoplay">
+                <i class="fa-solid fa-gamepad"></i> Nasıl Oynanır?
+              </button>
+              <button class="info-tab-btn" data-tab="changelog">
+                <i class="fa-solid fa-clock-rotate-left"></i> Yenilikler
+              </button>
+            </div>
+            
+            <div class="info-tab-content active" id="tab-howtoplay">
+              <div class="guide-step">
+                <div class="guide-badge red"><i class="fa-solid fa-user-tie"></i> LİDER (Spymaster)</div>
+                <p>Kendi takımının kelimelerini ilişkilendiren <strong>tek kelimelik bir ipucu ve bir sayı</strong> verir (Örn: <em>Uzay 2</em>).</p>
+              </div>
+              <div class="guide-step">
+                <div class="guide-badge blue"><i class="fa-solid fa-user-shield"></i> EKİP (Saha Ajanları)</div>
+                <p>Liderin verdiği ipucunu tartışarak kendi renklerindeki kelime kartlarını bulmaya çalışır.</p>
+              </div>
+              <div class="guide-step">
+                <div class="guide-badge neutral"><i class="fa-solid fa-user-slash"></i> SİVİLLER</div>
+                <p>Nötr kartlardır. Seçilirse tur sonlanır ve sıra karşı takıma geçer.</p>
+              </div>
+              <div class="guide-step">
+                <div class="guide-badge assassin"><i class="fa-solid fa-skull-crossbones"></i> SUİKASTÇI</div>
+                <p>Siyah karttır! Seçen takım oyunu <strong>anında kaybeder</strong>.</p>
+              </div>
+            </div>
+            
+            <div class="info-tab-content" id="tab-changelog">
+              <div class="changelog-item">
+                <div class="changelog-header">
+                  <span class="version">v1.2.0</span>
+                  <span class="date">Bugün</span>
+                </div>
+                <ul>
+                  <li>Lobi ekranına <strong>Hazır Ol (Ready)</strong> onay sistemi eklendi 🟢</li>
+                  <li>Ses seviyesi durumuna göre lobi geçiş animasyonları optimize edildi.</li>
+                </ul>
+              </div>
+              <div class="changelog-item">
+                <div class="changelog-header">
+                  <span class="version">v1.1.5</span>
+                  <span class="date">Dün</span>
+                </div>
+                <ul>
+                  <li><strong>Otomatik AFK Tur Devretme</strong> ve son 5 saniye geri sayım ses uyarısı eklendi ⏳</li>
+                  <li>Lider durum yazılarında takım renkleri belirginleştirildi.</li>
+                </ul>
+              </div>
+              <div class="changelog-item">
+                <div class="changelog-header">
+                  <span class="version">v1.1.0</span>
+                  <span class="date">Geçen Hafta</span>
+                </div>
+                <ul>
+                  <li>Kartların dönme animasyonları ayna efekti olmadan 2D ScaleX ile yenilendi 🎴</li>
+                  <li>Lobi düzeni daha geniş ekranlar için 3 sütunlu yapıya taşındı.</li>
+                </ul>
+              </div>
             </div>
           </div>
 
-          <div class="actions-grid">
-            <button id="create-room-btn" class="btn btn-primary btn-glow">
-              <i class="fa-solid fa-plus"></i> Lobi Kur
-            </button>
-            
-            <div class="divider"><span>Lobiye Katıl</span></div>
-
-            <div class="join-box">
-              <div class="input-wrapper">
-                <i class="fa-solid fa-key"></i>
-                <input type="text" id="room-code-input" placeholder="Lobi Kodu (6 Hane)..." maxlength="6">
+          <!-- RIGHT COLUMN: LOGIN CARD -->
+          <div class="glass-panel landing-card">
+            <div class="welcome-text">
+              <div class="card-logo-header">
+                <img src="/logos/logo.png" alt="Logo" class="card-header-logo-img">
+                <h2>IOWFNAMES</h2>
+                <img src="/logos/logo.png" alt="Logo" class="card-header-logo-img">
               </div>
-              <button id="join-room-btn" class="btn btn-secondary">
-                Katıl <i class="fa-solid fa-right-to-bracket"></i>
+              <p>IOWFNAMES Kelimelerin ardındaki gizli bağlantıları keşfedin.<br>
+              Takımınızı zafere taşıyın. Tek ipucu. Sayısız ihtimal.</p>
+            </div>
+            
+            <div class="form-group">
+              <label for="username-input">Takma Adınız</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="username-input" placeholder="İsminizi girin..." maxlength="15" value="">
+              </div>
+            </div>
+  
+            <div class="actions-grid">
+              <button id="create-room-btn" class="btn btn-primary btn-glow">
+                <i class="fa-solid fa-plus"></i> Lobi Kur
               </button>
+              
+              <div class="divider"><span>Lobiye Katıl</span></div>
+  
+              <div class="join-box">
+                <div class="input-wrapper">
+                  <i class="fa-solid fa-key"></i>
+                  <input type="text" id="room-code-input" placeholder="Lobi Kodu (6 Hane)..." maxlength="6">
+                </div>
+                <button id="join-room-btn" class="btn btn-secondary">
+                  Katıl <i class="fa-solid fa-right-to-bracket"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -153,6 +221,20 @@
                 <button id="copy-code-btn" class="small-btn" title="Kodu Kopyala"><i class="fa-solid fa-copy"></i></button>
               </div>
             </div>
+
+            <!-- Neon Glow Picker -->
+            <div class="glow-picker-container">
+              <span class="label">NEON PARILTI SEÇ</span>
+              <div class="glow-options">
+                <button class="glow-opt-btn active" data-glow="none" title="Efektsiz" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);"></button>
+                <button class="glow-opt-btn" data-glow="gold" title="Altın Sarısı" style="background: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.5);"></button>
+                <button class="glow-opt-btn" data-glow="purple" title="Neon Mor" style="background: #a855f7; box-shadow: 0 0 10px rgba(168,85,247,0.5);"></button>
+                <button class="glow-opt-btn" data-glow="green" title="Siber Yeşil" style="background: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,0.5);"></button>
+                <button class="glow-opt-btn" data-glow="cyan" title="Buz Mavisi" style="background: #06b6d4; box-shadow: 0 0 10px rgba(6,182,212,0.5);"></button>
+                <button class="glow-opt-btn" data-glow="pink" title="Neon Pembe" style="background: #ec4899; box-shadow: 0 0 10px rgba(236,72,153,0.5);"></button>
+              </div>
+            </div>
+
             <button id="share-room-btn" class="btn btn-secondary btn-glow">
               <i class="fa-solid fa-share-nodes"></i> Lobi Bilgilerini Kopyala
             </button>

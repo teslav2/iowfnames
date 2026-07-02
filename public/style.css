@@ -60,6 +60,15 @@ body {
   overflow: hidden;
   pointer-events: none;
   background: radial-gradient(circle at 50% 50%, #0d1222 0%, #07090e 100%);
+  transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-bg.turn-red {
+  background: radial-gradient(circle at 50% 50%, #3a0a14 0%, #0c0204 100%) !important;
+}
+
+.glow-bg.turn-blue {
+  background: radial-gradient(circle at 50% 50%, #08243c 0%, #02090f 100%) !important;
 }
 
 .glow-sphere {
@@ -2990,4 +2999,328 @@ body {
   .feedback-drawer-content {
     width: 280px;
   }
+}
+
+/* Landing Layout Grid */
+.landing-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2.5rem;
+  max-width: 1200px;
+  width: 90%;
+  margin: 2rem auto;
+  align-items: stretch;
+}
+
+.landing-info-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 3rem !important;
+  border-radius: 24px !important;
+  background: rgba(16, 22, 37, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  min-height: 520px;
+}
+
+/* Override for grid layout */
+.landing-layout-grid .landing-card {
+  margin: 0;
+  max-width: none;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Info Tabs Header */
+.info-tabs {
+  display: flex;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+}
+
+.info-tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 0.75rem 0.2rem;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-tab-btn:hover {
+  color: #fff;
+}
+
+.info-tab-btn.active {
+  color: var(--color-blue);
+}
+
+.info-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--color-blue);
+  box-shadow: 0 0 8px var(--color-blue);
+}
+
+/* Tab Contents */
+.info-tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.info-tab-content.active {
+  display: flex;
+}
+
+/* Custom Scrollbar for Info Panel */
+.info-tab-content::-webkit-scrollbar {
+  width: 4px;
+}
+.info-tab-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.info-tab-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* Guide Step Styles */
+.guide-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.guide-badge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  width: max-content;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.guide-badge.red {
+  background: rgba(255, 56, 96, 0.15);
+  color: var(--color-red);
+  border: 1px solid rgba(255, 56, 96, 0.3);
+}
+
+.guide-badge.blue {
+  background: rgba(0, 210, 255, 0.15);
+  color: var(--color-blue);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+.guide-badge.neutral {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.guide-badge.assassin {
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.guide-step p {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.guide-step p em {
+  color: #00d2ff;
+  font-style: normal;
+}
+
+/* Changelog Styles */
+.changelog-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+}
+
+.changelog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding-bottom: 0.2rem;
+}
+
+.changelog-header .version {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--color-blue);
+}
+
+.changelog-header .date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.changelog-item ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.changelog-item li {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 0.25rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 900px) {
+  .landing-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 1rem auto;
+  }
+  .landing-info-panel {
+    padding: 2rem !important;
+    min-height: auto;
+    order: 2; /* Main card goes first on mobile */
+  }
+}
+
+/* Neon Glow Picker styles */
+.glow-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.glow-options {
+  display: flex;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.35rem 0.65rem;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glow-opt-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
+  padding: 0;
+  outline: none;
+}
+
+.glow-opt-btn:hover {
+  transform: scale(1.22);
+}
+
+.glow-opt-btn.active {
+  border-color: #ffffff !important;
+  transform: scale(1.22);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Dynamic glow effects for lobby player cards and game tags */
+.player-item.glow-gold,
+.admin-player-item.glow-gold,
+.agent-tag.glow-gold,
+.spymaster-badge.glow-gold {
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.45) !important;
+  border-color: rgba(255, 215, 0, 0.6) !important;
+  background: rgba(255, 215, 0, 0.08) !important;
+}
+
+.player-item.glow-purple,
+.admin-player-item.glow-purple,
+.agent-tag.glow-purple,
+.spymaster-badge.glow-purple {
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.45) !important;
+  border-color: rgba(168, 85, 247, 0.6) !important;
+  background: rgba(16, 22, 37, 0.65) !important;
+  background-image: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.12)) !important;
+}
+
+.player-item.glow-green,
+.admin-player-item.glow-green,
+.agent-tag.glow-green,
+.spymaster-badge.glow-green {
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.45) !important;
+  border-color: rgba(34, 197, 94, 0.6) !important;
+  background: rgba(16, 22, 37, 0.65) !important;
+  background-image: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.12)) !important;
+}
+
+.player-item.glow-cyan,
+.admin-player-item.glow-cyan,
+.agent-tag.glow-cyan,
+.spymaster-badge.glow-cyan {
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.45) !important;
+  border-color: rgba(6, 182, 212, 0.6) !important;
+  background: rgba(16, 22, 37, 0.65) !important;
+  background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(6, 182, 212, 0.12)) !important;
+}
+
+.player-item.glow-pink,
+.admin-player-item.glow-pink,
+.agent-tag.glow-pink,
+.spymaster-badge.glow-pink {
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.45) !important;
+  border-color: rgba(236, 72, 153, 0.6) !important;
+  background: rgba(16, 22, 37, 0.65) !important;
+  background-image: linear-gradient(135deg, rgba(236, 72, 153, 0.05), rgba(236, 72, 153, 0.12)) !important;
+}
+
+/* Ensure font weight is bold for glowing usernames */
+.player-item.glow-gold span, .player-item.glow-purple span, .player-item.glow-green span, .player-item.glow-cyan span, .player-item.glow-pink span {
+  font-weight: 700 !important;
+}
+
+/* Lobby Team Name Colors */
+.name-red {
+  color: var(--color-red) !important;
+  font-weight: 700;
+  text-shadow: 0 0 5px rgba(255, 56, 96, 0.25);
+}
+
+.name-blue {
+  color: var(--color-blue) !important;
+  font-weight: 700;
+  text-shadow: 0 0 5px rgba(0, 210, 255, 0.25);
+}
+
+.name-gray {
+  color: #a0a5aa !important;
+  font-weight: 500;
+  text-shadow: none;
 }
