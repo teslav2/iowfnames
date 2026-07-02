@@ -1576,3 +1576,20 @@ if (fullscreenBtn) {
     }
   });
 }
+
+// ============ FEEDBACK DRAWER CLICK CONTROLLER ============
+const feedbackDrawer = document.querySelector('.feedback-drawer');
+const feedbackTrigger = document.querySelector('.feedback-drawer-trigger');
+if (feedbackTrigger && feedbackDrawer) {
+  feedbackTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    feedbackDrawer.classList.toggle('active');
+  });
+
+  // Close the drawer if clicking anywhere else
+  document.addEventListener('click', (e) => {
+    if (!feedbackDrawer.contains(e.target)) {
+      feedbackDrawer.classList.remove('active');
+    }
+  });
+}
