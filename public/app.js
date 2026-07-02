@@ -508,7 +508,7 @@ if (copyCodeBtn) {
 
 if (shareRoomBtn) {
   shareRoomBtn.addEventListener('click', () => {
-    const shareText = `Kelime Oyunu Lobi Kodu: ${activeRoomCode}\nKatılmak için link: ${window.location.origin}/?room=${activeRoomCode}`;
+    const shareText = `🕵️ IOWFNAMES\nBir oyun lobesine davet edildin.\n🔑 Lobi Kodu: ${activeRoomCode}\n🌐 ${window.location.origin}/${activeRoomCode}`;
     navigator.clipboard.writeText(shareText).then(() => {
       alert("Lobi davet mesajı panoya kopyalandı!");
     });
@@ -1555,7 +1555,16 @@ function escapeHTML(str) {
 // Auto join link parameter
 window.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const roomCodeQuery = urlParams.get('room');
+  let roomCodeQuery = urlParams.get('room');
+  
+  // If no query parameter, check pathname (e.g. /AXMBFC)
+  if (!roomCodeQuery) {
+    const pathCode = window.location.pathname.substring(1).toUpperCase();
+    if (/^[A-Z]{6}$/.test(pathCode)) {
+      roomCodeQuery = pathCode;
+    }
+  }
+
   if (roomCodeQuery && roomCodeQuery.length === 6 && roomCodeInput) {
     roomCodeInput.value = roomCodeQuery.toUpperCase();
   }
