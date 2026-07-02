@@ -74,42 +74,60 @@
           <!-- LEFT COLUMN: INFO PANEL -->
           <div class="glass-panel landing-info-panel">
             <div class="info-tabs">
-              <button class="info-tab-btn active" data-tab="howtoplay">
-                <i class="fa-solid fa-gamepad"></i> Nasıl Oynanır?
+              <button class="info-tab-btn active" data-tab="feedback">
+                <i class="fa-solid fa-comments"></i> Geri Bildirim
               </button>
               <button class="info-tab-btn" data-tab="changelog">
                 <i class="fa-solid fa-clock-rotate-left"></i> Yenilikler
               </button>
+              <button class="info-tab-btn" data-tab="howtoplay">
+                <i class="fa-solid fa-gamepad"></i> Nasıl Oynanır?
+              </button>
             </div>
             
-            <div class="info-tab-content active" id="tab-howtoplay">
-              <div class="guide-step">
-                <div class="guide-badge red"><i class="fa-solid fa-user-tie"></i> LİDER (Spymaster)</div>
-                <p>Kendi takımının kelimelerini ilişkilendiren <strong>tek kelimelik bir ipucu ve bir sayı</strong> verir (Örn: <em>Uzay 2</em>).</p>
-              </div>
-              <div class="guide-step">
-                <div class="guide-badge blue"><i class="fa-solid fa-user-shield"></i> EKİP (Saha Ajanları)</div>
-                <p>Liderin verdiği ipucunu tartışarak kendi renklerindeki kelime kartlarını bulmaya çalışır.</p>
-              </div>
-              <div class="guide-step">
-                <div class="guide-badge neutral"><i class="fa-solid fa-user-slash"></i> SİVİLLER</div>
-                <p>Nötr kartlardır. Seçilirse tur sonlanır ve sıra karşı takıma geçer.</p>
-              </div>
-              <div class="guide-step">
-                <div class="guide-badge assassin"><i class="fa-solid fa-skull-crossbones"></i> SUİKASTÇI</div>
-                <p>Siyah karttır! Seçen takım oyunu <strong>anında kaybeder</strong>.</p>
-              </div>
-            </div>
-            
+            <!-- Tab 1: Feedback (Active by default) -->
+            <div class="info-tab-content active" id="tab-feedback">
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.8rem; line-height: 1.4;">
+                Oyunu geliştirmeme katkı sağlamak isterseniz geri bildirimlerinizi aşağıdaki kanallardan iletebilirsiniz:
+              </p>
+              <div class="feedback-list" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                <div class="feedback-item">
+                  <a href="https://discord.com/users/603194316201918484" target="_blank" title="Discord'dan Ekle">
+                    <i class="fa-brands fa-discord" style="color: #5865F2;"></i> Discord: <strong>Tesla.v2</strong>
+                  </a>
+                </div>
+                <div class="feedback-item">
+                  <a href="https://www.instagram.com/tesla.v2" target="_blank" title="Instagram'dan Takip Et">
+                    <i class="fa-brands fa-instagram" style="color: #E1306C;"></i> Instagram: <strong>tesla.v2</strong>
+                  </a>
+                </div>
+                <div class="feedback-item">
+                  <a href="https://t.me/Teslav2" target="_blank" title="Telegram'dan Yaz">
+                    <i class="fa-brands fa-telegram" style="color: #0088cc;"></i> Telegram: <strong>Teslav2</strong>
+                  </a>
+                </div>
+                <div class="feedback-item">
+                  <a href="mailto:teslav2games@gmail.com" title="E-Posta Gönder">
+                    <i class="fa-solid fa-envelope" style="color: #ff3860;"></i> E-Posta: <strong>teslav2games@gmail.com</strong>
+                  </a>
+                </div>
+                <div class="feedback-item">
+                  <a href="https://teslav2.com/" target="_blank" title="Web Sitemi Ziyaret Et">
+                    <i class="fa-solid fa-globe" style="color: #00d2ff;"></i> Web: <strong>teslav2.com</strong>
+                  </a>
+                      <!-- Tab 2: Changelog -->
             <div class="info-tab-content" id="tab-changelog">
               <div class="changelog-item">
                 <div class="changelog-header">
-                  <span class="version">v1.2.0</span>
+                  <span class="version">v1.2.5</span>
                   <span class="date">Bugün</span>
                 </div>
                 <ul>
-                  <li>Lobi ekranına <strong>Hazır Ol (Ready)</strong> onay sistemi eklendi 🟢</li>
-                  <li>Ses seviyesi durumuna göre lobi geçiş animasyonları optimize edildi.</li>
+                  <li>Lobiye <strong>Neon Parıltı Seçici (Glow Picker)</strong> eklendi! ✨</li>
+                  <li>Sıradaki takıma göre <strong>Dinamik Arka Plan Renk Efekti</strong> (Kırmızı/Mavi) eklendi 🔴🔵</li>
+                  <li>Lobi kullanıcı isimleri takımlarına göre renklendirildi (Kırmızı/Mavi/Gri) 🎨</li>
+                  <li>Oda lideri takıma girdiğinde Hazır Ol (Ready) simgesinin çıkmama sorunu çözüldü 🟢</li>
+                  <li>İletişim paneline Telegram (`@Teslav2`) bağlantısı eklendi ✈️</li>
                 </ul>
               </div>
               <div class="changelog-item">
@@ -133,6 +151,26 @@
                 </ul>
               </div>
             </div>
+
+            <!-- Tab 3: How to Play -->
+            <div class="info-tab-content" id="tab-howtoplay">
+              <div class="guide-step">
+                <div class="guide-badge red"><i class="fa-solid fa-user-tie"></i> LİDER (Spymaster)</div>
+                <p>Kendi takımının kelimelerini ilişkilendiren <strong>tek kelimelik bir ipucu ve bir sayı</strong> verir (Örn: <em>Uzay 2</em>).</p>
+              </div>
+              <div class="guide-step">
+                <div class="guide-badge blue"><i class="fa-solid fa-user-shield"></i> EKİP (Saha Ajanları)</div>
+                <p>Liderin verdiği ipucunu tartışarak kendi renklerindeki kelime kartlarını bulmaya çalışır.</p>
+              </div>
+              <div class="guide-step">
+                <div class="guide-badge neutral"><i class="fa-solid fa-user-slash"></i> SİVİLLER</div>
+                <p>Nötr kartlardır. Seçilirse tur sonlanır ve sıra karşı takıma geçer.</p>
+              </div>
+              <div class="guide-step">
+                <div class="guide-badge assassin"><i class="fa-solid fa-skull-crossbones"></i> SUİKASTÇI</div>
+                <p>Siyah karttır! Seçen takım oyunu <strong>anında kaybeder</strong>.</p>
+              </div>
+            </div>
           </div>
 
           <!-- RIGHT COLUMN: LOGIN CARD -->
@@ -143,6 +181,7 @@
                 <h2>IOWFNAMES</h2>
                 <img src="/logos/logo.png" alt="Logo" class="card-header-logo-img">
               </div>
+              <div class="version-display" style="font-size: 0.8rem; color: var(--color-blue); font-weight: 700; margin-top: -0.5rem; margin-bottom: 0.5rem; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0, 210, 255, 0.4); text-align: center;">VERSION: 1.2.5</div>
               <p>IOWFNAMES Kelimelerin ardındaki gizli bağlantıları keşfedin.<br>
               Takımınızı zafere taşıyın. Tek ipucu. Sayısız ihtimal.</p>
             </div>
@@ -175,36 +214,9 @@
           </div>
         </div>
 
-        <!-- Feedback Floating Drawer -->
-        <div class="feedback-drawer">
-          <div class="feedback-drawer-trigger">
-            <i class="fa-solid fa-comments"></i> <span>Geri Bildirim</span>
-          </div>
-          <div class="feedback-drawer-content glass-panel">
-            <h4><i class="fa-solid fa-envelope-open-text"></i> Geri Bildirim & İletişim</h4>
-            <p>Oyunu geliştirmeme katkı sağlamak isterseniz geri bildirimlerinizi iletebilirsiniz:</p>
-            
-            <div class="feedback-item">
-              <a href="https://discord.com/users/603194316201918484" target="_blank" title="Discord'dan Ekle">
-                <i class="fa-brands fa-discord" style="color: #5865F2;"></i> Discord: <strong>Tesla.v2</strong>
-              </a>
-            </div>
-            <div class="feedback-item">
-              <a href="https://www.instagram.com/tesla.v2" target="_blank" title="Instagram'dan Takip Et">
-                <i class="fa-brands fa-instagram" style="color: #E1306C;"></i> Instagram: <strong>tesla.v2</strong>
-              </a>
-            </div>
-            <div class="feedback-item">
-              <a href="mailto:teslav2games@gmail.com" title="E-Posta Gönder">
-                <i class="fa-solid fa-envelope" style="color: #ff3860;"></i> E-Posta: <strong>teslav2games@gmail.com</strong>
-              </a>
-            </div>
-            <div class="feedback-item">
-              <a href="https://teslav2.com/" target="_blank" title="Web Sitemi Ziyaret Et">
-                <i class="fa-solid fa-globe" style="color: #00d2ff;"></i> Web: <strong>teslav2.com</strong>
-              </a>
-            </div>
-          </div>
+        <!-- Copyright bottom notice -->
+        <div class="landing-footer-copyright" style="text-align: center; font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 1.5rem; padding-bottom: 1rem; font-family: var(--font-body);">
+          © 2026 Teslav2 Tüm Hakları Saklıdır.
         </div>
       </section>
 

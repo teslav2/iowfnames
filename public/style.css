@@ -2880,78 +2880,7 @@ body {
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.15);
 }
 
-/* Feedback Floating Drawer Styles */
-.feedback-drawer {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-
-.feedback-drawer-trigger {
-  background: linear-gradient(135deg, var(--color-blue), #0066ff);
-  color: white;
-  padding: 0.85rem 1.6rem;
-  border-radius: 50px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 210, 255, 0.35);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  user-select: none;
-}
-
-.feedback-drawer-trigger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 210, 255, 0.55);
-}
-
-.feedback-drawer-content {
-  width: 360px;
-  padding: 1.5rem !important;
-  border-radius: 16px !important;
-  background: rgba(16, 22, 37, 0.92) !important;
-  border: 1px solid rgba(0, 210, 255, 0.3) !important;
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6) !important;
-  opacity: 0;
-  transform: translateY(15px) scale(0.95);
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: bottom right;
-}
-
-/* Show content ONLY when active (clicked) */
-.feedback-drawer.active .feedback-drawer-content {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
-.feedback-drawer-content h4 {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  margin-bottom: 0.4rem;
-  color: var(--color-blue);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.feedback-drawer-content p {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.4;
-  margin-bottom: 0.8rem;
-}
+/* Feedback Styles (Integrated in Info Panel) */
 
 .feedback-item {
   margin-bottom: 0.5rem;
@@ -2990,23 +2919,14 @@ body {
   font-weight: 700;
 }
 
-/* Responsive styling for small screens */
-@media (max-width: 600px) {
-  .feedback-drawer {
-    bottom: 16px;
-    right: 16px;
-  }
-  .feedback-drawer-content {
-    width: 280px;
-  }
-}
+
 
 /* Landing Layout Grid */
 .landing-layout-grid {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 365px 1fr;
   gap: 2.5rem;
-  max-width: 1200px;
+  max-width: 1100px;
   width: 90%;
   margin: 2rem auto;
   align-items: stretch;
@@ -3015,11 +2935,11 @@ body {
 .landing-info-panel {
   display: flex;
   flex-direction: column;
-  padding: 3rem !important;
+  padding: 2rem 1.8rem !important;
   border-radius: 24px !important;
   background: rgba(16, 22, 37, 0.7) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  min-height: 520px;
+  min-height: 500px;
 }
 
 /* Override for grid layout */
@@ -3033,11 +2953,13 @@ body {
 }
 
 /* Info Tabs Header */
+/* Info Tabs Header */
 .info-tabs {
   display: flex;
   border-bottom: 2px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 1.5rem;
-  gap: 1.5rem;
+  gap: 0.5rem;
+  justify-content: space-between;
 }
 
 .info-tab-btn {
@@ -3046,14 +2968,14 @@ body {
   color: var(--text-muted);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.05rem;
-  padding: 0.75rem 0.2rem;
+  font-size: 0.86rem;
+  padding: 0.75rem 0.1rem;
   cursor: pointer;
   position: relative;
   transition: color 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .info-tab-btn:hover {
