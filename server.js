@@ -17,6 +17,17 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Route for short room links: /ROOMCODE
+app.get('/:roomCode', (req, res) => {
+  const code = req.params.roomCode.toUpperCase();
+  // If it's a 6-letter alphabetic string, serve the main game page
+  if (/^[A-Z]{6}$/.test(code)) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } else {
+    res.status(404).send('Not Found');
+  }
+});
+
 // Load words from words_tr.json
 let wordList = [];
 try {
