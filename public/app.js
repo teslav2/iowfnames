@@ -76,6 +76,7 @@ const copyCodeBtn = document.getElementById('copy-code-btn');
 const shareRoomBtn = document.getElementById('share-room-btn');
 const startGameBtn = document.getElementById('start-game-btn');
 const testModeBtn = document.getElementById('test-mode-btn');
+const toggleReadyBtn = document.getElementById('toggle-ready-btn');
 const leaveRoomBtns = document.querySelectorAll('.leave-room-btn');
 
 // Lobby Listings
@@ -333,6 +334,20 @@ if (typeof io !== 'undefined') {
       safeSetValue(maxPlayersSelect, roomData.settings.maxPlayers);
     }
 
+    // Sync Ready Button for regular team players
+    if (toggleReadyBtn) {
+      const showReadyBtn = !myPlayerInfo.isHost && myPlayerInfo.team !== 'spectator';
+      safeSetDisplay(toggleReadyBtn, showReadyBtn ? 'block' : 'none');
+      
+      if (myPlayerInfo.ready) {
+        toggleReadyBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Hazır Değil Yap';
+        toggleReadyBtn.className = 'btn btn-danger w-100 mt-5';
+      } else {
+        toggleReadyBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Hazır Ol';
+        toggleReadyBtn.className = 'btn btn-local w-100 mt-5';
+      }
+    }
+
     renderLobbyPlayers(roomData.players);
     renderLobbyPlayersAdminList(roomData.players);
 
@@ -442,6 +457,12 @@ if (startGameBtn) {
 if (testModeBtn) {
   testModeBtn.addEventListener('click', () => {
     if (socket) socket.emit('startTestMode');
+  });
+}
+
+if (toggleReadyBtn) {
+  toggleReadyBtn.addEventListener('click', () => {
+    if (socket) socket.emit('toggleReady');
   });
 }
 
@@ -910,6 +931,15 @@ function renderLobbyPlayers(players) {
                   ${p.isHost ? `<span class="host-badge"><i class="fa-solid fa-crown"></i> HOST</span>` : ''}
                   <span class="player-emoji-slot">${p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : ''}</span>
                 </div>`;
+    
+    // Add Ready badge for team players who are not the host
+    if (p.team !== 'spectator' && !p.isHost) {
+      if (p.ready) {
+        html += `<span class="ready-badge ready"><i class="fa-solid fa-circle-check"></i> Hazır</span>`;
+      } else {
+        html += `<span class="ready-badge not-ready"><i class="fa-solid fa-circle-xmark"></i> Hazır Değil</span>`;
+      }
+    }
     
     if (!p.connected) {
       html += `<span class="offline-badge">(Bağlantı Koptu)</span>`;
