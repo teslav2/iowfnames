@@ -414,15 +414,13 @@ if (testModeBtn) {
 
 leaveRoomBtns.forEach(btn => {
   btn.addEventListener('click', () => {
-    if (confirm("Odadan ayrılmak istediğinize emin misiniz?")) {
-      stopTimer();
-      clearSavedSession();
-      if (socket) {
-        socket.disconnect();
-        socket.connect();
-      }
-      switchScreen(screenLanding);
+    stopTimer();
+    clearSavedSession();
+    if (socket) {
+      socket.disconnect();
+      socket.connect();
     }
+    switchScreen(screenLanding);
   });
 });
 
@@ -804,17 +802,13 @@ if (btnPassTurn) {
 
 if (btnRestartGame) {
   btnRestartGame.addEventListener('click', () => {
-    if (confirm("Oyunu yeniden başlatmak istiyor musunuz?")) {
-      if (socket) socket.emit('restartGame');
-    }
+    if (socket) socket.emit('restartGame');
   });
 }
 
 if (btnResetLobby) {
   btnResetLobby.addEventListener('click', () => {
-    if (confirm("Oyunu sonlandırıp lobiye dönmek istiyor musunuz?")) {
-      if (socket) socket.emit('resetToLobby');
-    }
+    if (socket) socket.emit('resetToLobby');
   });
 }
 
