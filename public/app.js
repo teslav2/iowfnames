@@ -1,7 +1,7 @@
-// Safe LocalStorage Helper Functions (Avoids SecurityError crashes in private/restricted browsers)
+// Safe SessionStorage Helper Functions (Avoids SecurityError crashes in private/restricted browsers)
 function safeGetStorage(key) {
   try {
-    return localStorage.getItem(key);
+    return sessionStorage.getItem(key);
   } catch (e) {
     return null;
   }
@@ -9,13 +9,13 @@ function safeGetStorage(key) {
 
 function safeSetStorage(key, value) {
   try {
-    localStorage.setItem(key, value);
+    sessionStorage.setItem(key, value);
   } catch (e) {}
 }
 
 function safeRemoveStorage(key) {
   try {
-    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
   } catch (e) {}
 }
 
@@ -1576,7 +1576,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // Show the guest username modal prompt overlay
     const modal = document.getElementById('username-modal-overlay');
-    if (modal) modal.style.display = 'flex';
+    if (modal) modal.classList.add('active');
   }
 });
 
@@ -1717,7 +1717,7 @@ if (modalUsernameInput) {
 if (socket) {
   socket.on('nameChangeSuccess', () => {
     if (usernameModalOverlay) {
-      usernameModalOverlay.style.display = 'none';
+      usernameModalOverlay.classList.remove('active');
     }
   });
 }
