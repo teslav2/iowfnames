@@ -913,8 +913,6 @@ io.on('connection', (socket) => {
           currentTurn.clue.remainingGuesses--;
           if (currentTurn.clue.remainingGuesses <= 0) {
             switchTurn(room);
-          } else {
-            startServerTimer(currentRoomCode); // Reset timer for next guess
           }
         }
       } else if (card.color === 'neutral') {
