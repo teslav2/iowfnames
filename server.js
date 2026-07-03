@@ -980,26 +980,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 16. Card click: Toggle Stage (Reveal word over character on 2nd click)
-  socket.on('revealWordStage', ({ cardIndex }) => {
-    try {
-      if (!currentRoomCode || !rooms[currentRoomCode]) return;
-      const room = rooms[currentRoomCode];
-      const gameState = room.gameState;
-      if (!gameState) return;
-
-      const card = gameState.board[cardIndex];
-      if (!card || !card.revealed) return;
-
-      // Toggle stage 1 <-> 2
-      card.stage = card.stage === 1 ? 2 : 1;
-
-      io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
-    } catch (e) {
-      console.error("revealWordStage error:", e);
-    }
-  });
-
   // 17. Send Emoji Reaction
   socket.on('sendEmoji', ({ emoji }) => {
     try {

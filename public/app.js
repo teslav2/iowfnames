@@ -1375,7 +1375,7 @@ function renderGame(gameState, playersList, roomSettings) {
       const isNewlyRevealed = !wasRevealed && isNowRevealed;
 
       const targetClassName = `card-item color-${card.color}` +
-        (card.revealed ? ` revealed stage-${card.stage}` : '') +
+        (card.revealed ? ` revealed` : '') +
         (isSpymasterView ? ' is-spymaster' : '');
 
       if (cardEl.dataset.state !== cardStateString) {
@@ -1446,8 +1446,6 @@ function renderGame(gameState, playersList, roomSettings) {
           if (isMyTurnToGuess) {
             if (socket) socket.emit('toggleThinking', { cardIndex: index });
           }
-        } else {
-          if (socket) socket.emit('revealWordStage', { cardIndex: index });
         }
       };
       cardEl.addEventListener('click', cardEl._clickHandler);
