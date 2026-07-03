@@ -17,6 +17,31 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// REST API: Get public lobby list
+app.get('/api/lobbies', (req, res) => {
+  try {
+    const publicLobbies = [];
+    for (const code in rooms) {
+      const room = rooms[code];
+      if (room.isPublic && !room.gameStarted) {
+        const humanPlayers = room.players.filter(p => !p.isBot && p.connected);
+        const host = room.players.find(p => p.isHost);
+        publicLobbies.push({
+          roomCode: room.roomCode,
+          hostName: host ? host.name : 'Bilinmeyen',
+          playerCount: humanPlayers.length,
+          maxPlayers: room.settings.maxPlayers,
+          teamNames: room.teamNames || { red: 'KIRMIZI TAKIM', blue: 'MAVİ TAKIM' }
+        });
+      }
+    }
+    res.json({ lobbies: publicLobbies });
+  } catch (e) {
+    console.error('API lobbies error:', e);
+    res.json({ lobbies: [] });
+  }
+});
+
 // Route for short room links: /ROOMCODE
 app.get('/:roomCode', (req, res) => {
   const code = req.params.roomCode.toUpperCase();
@@ -222,6 +247,7 @@ function getRoomClientData(roomCode) {
     gameEnded: room.gameEnded,
     gameState: room.gameState,
     settings: room.settings,
+    isPublic: room.isPublic || false,
     teamNames: room.teamNames || { red: "KIRMIZI TAKIM", blue: "MAVİ TAKIM" }
   };
 }
@@ -317,6 +343,7 @@ io.on('connection', (socket) => {
         hostId: socket.id,
         gameState: null,
         bannedNames: [],
+        isPublic: false,
         teamNames: { red: "KIRMIZI TAKIM", blue: "MAVİ TAKIM" },
         settings: {
           turnDuration: 90, // default 90 seconds
@@ -558,6 +585,20 @@ io.on('connection', (socket) => {
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
     } catch (e) {
       console.error("updateSettings error:", e);
+    }
+  });
+
+  // 4.5. Toggle Public/Private Lobby (Host Only)
+  socket.on('togglePublic', () => {
+    try {
+      if (!currentRoomCode || !rooms[currentRoomCode]) return;
+      const room = rooms[currentRoomCode];
+      if (!isHost(room)) return socket.emit('errorMsg', 'Lobi gizliliğini sadece lider değiştirebilir.');
+
+      room.isPublic = !room.isPublic;
+      io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
+    } catch (e) {
+      console.error("togglePublic error:", e);
     }
   });
 

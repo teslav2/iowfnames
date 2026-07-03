@@ -3320,3 +3320,185 @@ body {
   border: 1px solid rgba(0, 210, 255, 0.25) !important;
   box-shadow: 0 0 25px rgba(0, 210, 255, 0.15) !important;
 }
+
+/* ============ ACTIVE LOBBIES SYSTEM ============ */
+
+/* Outline Cyan Button */
+.btn-outline-cyan {
+  background: transparent;
+  border: 1.5px solid var(--color-blue);
+  color: var(--color-blue);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+.btn-outline-cyan:hover {
+  background: rgba(0, 210, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Public Toggle Container */
+.public-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 22px;
+  transition: 0.3s;
+}
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--color-blue);
+  box-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
+
+/* Public Status Badge */
+.public-status-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.public-status-badge.private {
+  background: rgba(255, 56, 96, 0.15);
+  color: #ff3860;
+  border: 1px solid rgba(255, 56, 96, 0.3);
+}
+.public-status-badge.public {
+  background: rgba(0, 210, 255, 0.15);
+  color: #00d2ff;
+  border: 1px solid rgba(0, 210, 255, 0.3);
+}
+
+/* Lobbies Modal */
+.lobbies-modal-card {
+  max-width: 520px !important;
+  padding: 2rem !important;
+  border-radius: 20px !important;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.lobbies-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.lobbies-modal-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  background: linear-gradient(90deg, #00d2ff, #ff3860);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+/* Lobbies List */
+.lobbies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.lobbies-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Individual Lobby Card */
+.lobby-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: rgba(16, 22, 37, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+.lobby-list-item:hover {
+  border-color: rgba(0, 210, 255, 0.3);
+  background: rgba(16, 22, 37, 0.85);
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.1);
+}
+.lobby-list-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.lobby-list-host {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+.lobby-list-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.8rem;
+}
+.lobby-list-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.lobby-join-btn {
+  background: linear-gradient(135deg, var(--color-blue), #0088cc);
+  color: white;
+  border: none;
+  padding: 0.45rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.lobby-join-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+}
+

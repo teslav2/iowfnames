@@ -339,6 +339,26 @@ if (typeof io !== 'undefined') {
       safeSetValue(maxPlayersSelect, roomData.settings.maxPlayers);
     }
 
+    // Sync Public/Private toggle (host only visibility)
+    const publicToggleContainer = document.getElementById('public-toggle-container');
+    const publicCheckbox = document.getElementById('toggle-public-checkbox');
+    const publicBadge = document.getElementById('public-status-badge');
+    if (publicToggleContainer) {
+      publicToggleContainer.style.display = isAdmin ? 'flex' : 'none';
+    }
+    if (publicCheckbox) {
+      publicCheckbox.checked = roomData.isPublic;
+    }
+    if (publicBadge) {
+      if (roomData.isPublic) {
+        publicBadge.textContent = 'AÇIK';
+        publicBadge.className = 'public-status-badge public';
+      } else {
+        publicBadge.textContent = 'GİZLİ';
+        publicBadge.className = 'public-status-badge private';
+      }
+    }
+
     // Sync Glow Picker active state for current player
     if (myPlayerInfo && myPlayerInfo.glow) {
       document.querySelectorAll('.glow-opt-btn').forEach(btn => {
@@ -451,6 +471,93 @@ if (joinRoomBtn) {
 
     if (socket) {
       socket.emit('joinRoom', { roomCode: code, name, playerId: localPlayerId });
+    }
+  });
+}
+
+// --- BROWSE LOBBIES MODAL ---
+const browseLobbiesBtn = document.getElementById('browse-lobbies-btn');
+const lobbiesModalOverlay = document.getElementById('lobbies-modal-overlay');
+const closeLobbiesModal = document.getElementById('close-lobbies-modal');
+const refreshLobbiesBtn = document.getElementById('refresh-lobbies-btn');
+const lobbiesList = document.getElementById('lobbies-list');
+
+function fetchAndRenderLobbies() {
+  if (!lobbiesList) return;
+  lobbiesList.innerHTML = '<div class="lobbies-empty"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem; opacity: 0.4; margin-bottom: 0.5rem;"></i><p>Yükleniyor...</p></div>';
+
+  fetch('/api/lobbies')
+    .then(res => res.json())
+    .then(data => {
+      if (!data.lobbies || data.lobbies.length === 0) {
+        lobbiesList.innerHTML = '<div class="lobbies-empty"><i class="fa-solid fa-ghost" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem;"></i><p>Şu an herkese açık aktif lobi bulunamadı.</p></div>';
+        return;
+      }
+
+      lobbiesList.innerHTML = '';
+      data.lobbies.forEach(lobby => {
+        const maxText = lobby.maxPlayers === 'unlimited' ? '∞' : lobby.maxPlayers;
+        const item = document.createElement('div');
+        item.className = 'lobby-list-item';
+        item.innerHTML = `
+          <div class="lobby-list-info">
+            <div class="lobby-list-host"><i class="fa-solid fa-crown" style="color: #ffd700; font-size: 0.75rem;"></i> ${lobby.hostName}</div>
+            <div class="lobby-list-meta">
+              <span><i class="fa-solid fa-users"></i> ${lobby.playerCount}/${maxText}</span>
+              <span><i class="fa-solid fa-key"></i> ${lobby.roomCode}</span>
+            </div>
+          </div>
+          <button class="lobby-join-btn" data-code="${lobby.roomCode}">Katıl <i class="fa-solid fa-right-to-bracket"></i></button>
+        `;
+        lobbiesList.appendChild(item);
+      });
+
+      // Attach join click to lobby cards
+      lobbiesList.querySelectorAll('.lobby-join-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const code = btn.dataset.code;
+          const name = usernameInput ? usernameInput.value.trim() : '';
+          if (!name) {
+            alert("Lütfen önce ana sayfada bir takma ad girin.");
+            if (lobbiesModalOverlay) lobbiesModalOverlay.classList.remove('active');
+            return;
+          }
+          if (lobbiesModalOverlay) lobbiesModalOverlay.classList.remove('active');
+          if (socket) {
+            socket.emit('joinRoom', { roomCode: code, name, playerId: localPlayerId });
+          }
+        });
+      });
+    })
+    .catch(err => {
+      console.error('Lobby fetch error:', err);
+      lobbiesList.innerHTML = '<div class="lobbies-empty"><i class="fa-solid fa-triangle-exclamation" style="font-size: 1.5rem; opacity: 0.4; margin-bottom: 0.5rem;"></i><p>Lobiler yüklenirken bir hata oluştu.</p></div>';
+    });
+}
+
+if (browseLobbiesBtn) {
+  browseLobbiesBtn.addEventListener('click', () => {
+    if (lobbiesModalOverlay) lobbiesModalOverlay.classList.add('active');
+    fetchAndRenderLobbies();
+  });
+}
+
+if (closeLobbiesModal) {
+  closeLobbiesModal.addEventListener('click', () => {
+    if (lobbiesModalOverlay) lobbiesModalOverlay.classList.remove('active');
+  });
+}
+
+if (refreshLobbiesBtn) {
+  refreshLobbiesBtn.addEventListener('click', fetchAndRenderLobbies);
+}
+
+// --- PUBLIC/PRIVATE TOGGLE ---
+const togglePublicCheckbox = document.getElementById('toggle-public-checkbox');
+if (togglePublicCheckbox) {
+  togglePublicCheckbox.addEventListener('change', () => {
+    if (socket) {
+      socket.emit('togglePublic');
     }
   });
 }
