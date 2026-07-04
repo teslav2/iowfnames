@@ -10,13 +10,13 @@ function safeGetStorage(key) {
 function safeSetStorage(key, value) {
   try {
     sessionStorage.setItem(key, value);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function safeRemoveStorage(key) {
   try {
     sessionStorage.removeItem(key);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // Helper: Generate UUID for playerId
@@ -231,7 +231,7 @@ function playLocalSound(type) {
       osc.start();
       osc.stop(ctx.currentTime + 0.08);
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // Initialize Socket.io Connection
@@ -305,7 +305,7 @@ if (typeof io !== 'undefined') {
 
   socket.on('roomState', (roomData) => {
     if (!roomData) return;
-    
+
     roomAdminId = roomData.hostId;
     const me = roomData.players.find(p => p.playerId === localPlayerId);
     if (me) myPlayerInfo = me;
@@ -324,7 +324,7 @@ if (typeof io !== 'undefined') {
     safeSetDisplay(startGameBtn, isAdmin ? 'block' : 'none');
 
     // Test mode button is only visible to the host if their username is 'Teslav2' or 'Tesla.v2' (case-insensitive)
-    const isTeslaName = myPlayerInfo && myPlayerInfo.name && 
+    const isTeslaName = myPlayerInfo && myPlayerInfo.name &&
       (myPlayerInfo.name.toLowerCase() === 'teslav2' || myPlayerInfo.name.toLowerCase() === 'tesla.v2');
     safeSetDisplay(testModeBtn, (isAdmin && isTeslaName) ? 'block' : 'none');
 
@@ -374,7 +374,7 @@ if (typeof io !== 'undefined') {
     if (toggleReadyBtn) {
       const showReadyBtn = !myPlayerInfo.isHost && myPlayerInfo.team !== 'spectator';
       safeSetDisplay(toggleReadyBtn, showReadyBtn ? 'block' : 'none');
-      
+
       if (myPlayerInfo.ready) {
         toggleReadyBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Hazır Değil Yap';
         toggleReadyBtn.className = 'btn btn-danger w-100 mt-5';
@@ -407,7 +407,7 @@ if (typeof io !== 'undefined') {
     timerSecondsRemaining = remaining;
     if (!isUnlimitedTimer) {
       updateTimerUI(timerSecondsRemaining, parseInt((turnDurationSelect && turnDurationSelect.value) || 90));
-      
+
       // Play warning sound in final 5 seconds
       if (remaining <= 5 && remaining > 0) {
         playLocalSound('time-warning');
@@ -439,7 +439,7 @@ function clearSavedSession() {
 function switchScreen(targetScreen) {
   if (!targetScreen) return;
   if (targetScreen.classList.contains('active')) return; // Exit early if already on this screen
-  
+
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
     s.style.opacity = 0;
@@ -455,7 +455,7 @@ if (createRoomBtn) {
   createRoomBtn.addEventListener('click', () => {
     const name = usernameInput ? usernameInput.value.trim() : '';
     if (!name) return alert("Lütfen bir isim girin.");
-    
+
     if (socket) {
       socket.emit('createRoom', { name, playerId: localPlayerId });
     }
@@ -796,7 +796,7 @@ if (gameChatForm) {
 
 function appendChatBubble(msg, type = 'genel') {
   const isMe = msg.sender === myPlayerInfo.name;
-  
+
   if (type === 'genel') {
     // Append to lobby chat if present
     if (lobbyChatBox) {
@@ -865,11 +865,11 @@ function triggerFloatingEmoji(emoji) {
   item.textContent = emoji;
 
   // Random positioning and scaling parameters for realistic floating feel
-  const randomLeft = 20 + Math.random() * 60; 
-  const randomDrift = (Math.random() - 0.5) * 100; 
-  const randomScale = 0.8 + Math.random() * 0.7; 
-  const randomRotate = (Math.random() - 0.5) * 50; 
-  const randomDuration = 1.6 + Math.random() * 0.6; 
+  const randomLeft = 20 + Math.random() * 60;
+  const randomDrift = (Math.random() - 0.5) * 100;
+  const randomScale = 0.8 + Math.random() * 0.7;
+  const randomRotate = (Math.random() - 0.5) * 50;
+  const randomDuration = 1.6 + Math.random() * 0.6;
 
   item.style.left = `${randomLeft}%`;
   item.style.setProperty('--drift-x', `${randomDrift}px`);
@@ -890,7 +890,7 @@ function renderLobbyPlayersAdminList(players) {
   if (!adminPlayersBox) return;
   adminPlayersBox.innerHTML = '';
   safeSetText(playerCountLobby, players.length);
-  
+
   const isAdmin = socket && socket.id === roomAdminId;
 
   players.forEach(p => {
@@ -928,23 +928,23 @@ function renderLobbyPlayersAdminList(players) {
 }
 
 // Global window mappings
-window.handleAdminTransfer = function(playerId) {
+window.handleAdminTransfer = function (playerId) {
   if (confirm("Lobi liderliğini bu oyuncuya devretmek istiyor musunuz?")) {
     if (socket) socket.emit('transferAdmin', { playerId });
   }
 };
 
-window.handleMakeSpectator = function(playerId) {
+window.handleMakeSpectator = function (playerId) {
   if (socket) socket.emit('makeSpectator', { playerId });
 };
 
-window.handleKick = function(playerId) {
+window.handleKick = function (playerId) {
   if (confirm("Bu oyuncuyu odadan atmak istiyor musunuz?")) {
     if (socket) socket.emit('kickPlayer', { playerId });
   }
 };
 
-window.handleBan = function(playerId) {
+window.handleBan = function (playerId) {
   if (confirm("Bu oyuncuyu odadan kalıcı olarak yasaklamak istiyor musunuz?")) {
     if (socket) socket.emit('banPlayer', { playerId });
   }
@@ -970,7 +970,7 @@ if (clueForm) {
     e.preventDefault();
     const word = inputClueWord ? inputClueWord.value.trim().toUpperCase() : '';
     const count = parseInt(inputClueCount ? inputClueCount.value : '1');
-    
+
     if (!word) {
       alert("İpucu boş olamaz.");
       return;
@@ -979,7 +979,7 @@ if (clueForm) {
     if (socket) {
       socket.emit('submitClue', { clueWord: word, clueCount: count });
     }
-    
+
     if (inputClueWord) inputClueWord.value = '';
     if (inputClueCount) inputClueCount.value = '1';
   });
@@ -1050,7 +1050,7 @@ if (blueTeamNameInput) {
 // --- LOBBY LISTINGS RENDERING ---
 function renderLobbyPlayers(players) {
   if (!lobbyRedSpymaster || !lobbyRedAgents || !lobbyBlueSpymaster || !lobbyBlueAgents || !spectatorList) return;
-  
+
   lobbyRedSpymaster.innerHTML = '';
   lobbyRedAgents.innerHTML = '';
   lobbyBlueSpymaster.innerHTML = '';
@@ -1061,7 +1061,7 @@ function renderLobbyPlayers(players) {
     const div = document.createElement('div');
     div.className = `player-item team-${p.team} ${p.playerId === localPlayerId ? 'me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
     div.setAttribute('data-player-row-id', p.id);
-    
+
     let nameClass = '';
     if (p.role === 'spymaster') {
       nameClass = 'leader-name-gold';
@@ -1079,7 +1079,7 @@ function renderLobbyPlayers(players) {
                   ${p.isHost ? `<span class="host-badge"><i class="fa-solid fa-crown"></i> HOST</span>` : ''}
                   <span class="player-emoji-slot">${p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : ''}</span>
                 </div>`;
-    
+
     // Add Ready badge for all team players (including host)
     if (p.team !== 'spectator') {
       if (p.ready) {
@@ -1088,11 +1088,11 @@ function renderLobbyPlayers(players) {
         html += `<span class="ready-badge not-ready"><i class="fa-solid fa-circle-xmark"></i> Hazır Değil</span>`;
       }
     }
-    
+
     if (!p.connected) {
       html += `<span class="offline-badge">(Bağlantı Koptu)</span>`;
     }
-    
+
     div.innerHTML = html;
 
     if (p.team === 'red') {
@@ -1158,7 +1158,7 @@ function renderGame(gameState, playersList, roomSettings) {
     const turnTeamDisplayName = turn.team === 'red'
       ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
       : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
-    
+
     const teamSpan = turn.team === 'red'
       ? `<span class="text-red">${escapeHTML(turnTeamDisplayName)}</span>`
       : `<span class="text-blue">${escapeHTML(turnTeamDisplayName)}</span>`;
@@ -1170,7 +1170,7 @@ function renderGame(gameState, playersList, roomSettings) {
       turnStatusText.innerHTML = `${teamSpan} Ekibi seçiyor`;
       turnTeamName.textContent = '🎯';
     }
-    
+
     const turnIndicator = document.getElementById('turn-indicator');
     if (turnIndicator) {
       turnIndicator.className = `turn-indicator ${turn.team}`;
@@ -1327,12 +1327,13 @@ function renderGame(gameState, playersList, roomSettings) {
   if (cardsGrid) {
     const existingCards = cardsGrid.children;
     const needsFullRebuild = existingCards.length !== 25;
-    
+
     if (needsFullRebuild) {
       cardsGrid.innerHTML = '';
     }
 
     gameState.board.forEach((card, index) => {
+      if (gameState.winner) { card.revealed = true; }
       let cardEl;
       if (needsFullRebuild) {
         cardEl = document.createElement('div');
@@ -1340,7 +1341,7 @@ function renderGame(gameState, playersList, roomSettings) {
       } else {
         cardEl = existingCards[index];
       }
-      
+
       cardEl.dataset.index = index;
       const isCurrentUserThinking = card.thinkingBy.includes(socket && socket.id);
 
@@ -1357,10 +1358,13 @@ function renderGame(gameState, playersList, roomSettings) {
       const isMyTurnToGuess = isMyTeamTurn && isAgent && turn.role === 'agent';
       const showConfirmBtn = isMyTurnToGuess && isCurrentUserThinking && !card.revealed;
 
+      // When the game is won/ended, reveal all cards visually so players can see colors & characters
+      const isCardRevealed = card.revealed || (gameState.winner ? true : false);
+
       const cardStateString = JSON.stringify({
         word: card.word,
         color: card.color,
-        revealed: card.revealed,
+        revealed: isCardRevealed,
         stage: card.stage,
         thinkingBy: card.thinkingBy,
         showConfirmBtn: showConfirmBtn,
@@ -1371,11 +1375,11 @@ function renderGame(gameState, playersList, roomSettings) {
       });
 
       const wasRevealed = cardEl.classList.contains('revealed');
-      const isNowRevealed = card.revealed;
+      const isNowRevealed = isCardRevealed;
       const isNewlyRevealed = !wasRevealed && isNowRevealed;
 
       const targetClassName = `card-item color-${card.color}` +
-        (card.revealed ? ` revealed` : '') +
+        (isCardRevealed ? ` revealed` : '') +
         (isSpymasterView ? ' is-spymaster' : '');
 
       if (cardEl.dataset.state !== cardStateString) {
@@ -1468,20 +1472,20 @@ function renderGame(gameState, playersList, roomSettings) {
       if (entry.text.includes('ipucu verdi:')) {
         customClass = 'clue';
         const isRed = entry.text.includes('Kırmızı Anlatıcı') || entry.text.includes('Kırmızı');
-        const teamName = isRed 
+        const teamName = isRed
           ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI')
           : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ');
-        
+
         const matchWord = entry.text.match(/"([^"]+)"/);
         const clueText = matchWord ? matchWord[1] : '';
         formattedText = `💡 ${teamName} İpucu: ${clueText}`;
-      } 
+      }
       else if (entry.text.includes('kartını açtı. Sonuç:')) {
         const parts = entry.text.split(' ');
         const playerName = parts[0];
         const matchWord = entry.text.match(/"([^"]+)"/);
         const clickedWord = matchWord ? matchWord[1] : '';
-        
+
         let statusStr = '';
         if (entry.text.includes('Kırmızı Ekip 🔴') || entry.text.includes('Mavi Ekip 🔵')) {
           const isRedEkip = entry.text.includes('Kırmızı Ekip 🔴');
@@ -1513,7 +1517,7 @@ function renderGame(gameState, playersList, roomSettings) {
 
   // 10. Gameover modal overlay
   if (gameState.winner) {
-    const wTeamName = gameState.winner === 'red' 
+    const wTeamName = gameState.winner === 'red'
       ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
       : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
 
@@ -1522,7 +1526,7 @@ function renderGame(gameState, playersList, roomSettings) {
       winnerTeamText.className = `text-${gameState.winner}`;
     }
     safeSetText(winnerReasonText, `${wTeamName} tüm kelimeleri bularak oyunu kazandı!`);
-    
+
     if (gameoverModal && !gameoverModal.classList.contains('active') && !winnerModalDismissed) {
       playLocalSound('victory');
       gameoverModal.classList.add('active');
@@ -1646,7 +1650,7 @@ if (btnToggleSound) {
 
 function escapeHTML(str) {
   if (!str) return '';
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({
       '&': '&amp;',
       '<': '&lt;',
@@ -1661,7 +1665,7 @@ function escapeHTML(str) {
 window.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   let roomCodeQuery = urlParams.get('room');
-  
+
   // If no query parameter, check pathname (e.g. /AXMBFC)
   if (!roomCodeQuery) {
     const pathCode = window.location.pathname.substring(1).toUpperCase();
@@ -1672,13 +1676,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   if (roomCodeQuery && roomCodeQuery.length === 6) {
     if (roomCodeInput) roomCodeInput.value = roomCodeQuery.toUpperCase();
-    
+
     // Auto-join as a guest spectator with a unique temporary name so we can render the lobby in the background
     const tempGuestName = `Katılımcı#${Math.floor(1000 + Math.random() * 9000)}`;
     if (socket) {
       socket.emit('joinRoom', { roomCode: roomCodeQuery.toUpperCase(), name: tempGuestName, playerId: localPlayerId });
     }
-    
+
     // Show the guest username modal prompt overlay
     const modal = document.getElementById('username-modal-overlay');
     if (modal) {
@@ -1782,11 +1786,11 @@ const infoTabBtns = document.querySelectorAll('.info-tab-btn');
 infoTabBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const tabId = btn.dataset.tab;
-    
+
     // Remove active from all buttons and contents
     infoTabBtns.forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.info-tab-content').forEach(c => c.classList.remove('active'));
-    
+
     // Add active to current
     btn.classList.add('active');
     const targetContent = document.getElementById(`tab-${tabId}`);
@@ -1806,7 +1810,7 @@ function submitGuestUsername() {
     alert("Lütfen geçerli bir takma ad girin.");
     return;
   }
-  
+
   if (socket) {
     socket.emit('changeName', { name });
   }
