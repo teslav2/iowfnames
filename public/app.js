@@ -1402,13 +1402,12 @@ function renderGame(gameState, playersList, roomSettings) {
         }
       }
 
-      if (cardEl._clickHandler) {
+       if (cardEl._clickHandler) {
         cardEl.removeEventListener('click', cardEl._clickHandler);
       }
       cardEl._clickHandler = (e) => {
-        if (gameState.winner) return;
-
         if (e.target.closest('.confirm-reveal-btn')) {
+          if (gameState.winner) return; // Block reveal action after game over
           e.stopPropagation();
           if (socket) socket.emit('confirmReveal', { cardIndex: index });
           playLocalSound('click-correct');
@@ -1416,11 +1415,12 @@ function renderGame(gameState, playersList, roomSettings) {
         }
 
         if (!card.revealed) {
+          if (gameState.winner) return; // Block thinking action after game over
           if (isMyTurnToGuess) {
             if (socket) socket.emit('toggleThinking', { cardIndex: index });
           }
         } else {
-          // Card is already revealed! Toggle Stage 2 (Inspect Word) locally
+          // Card is already revealed! Toggle Stage 2 (Inspect Word) locally (always allowed!)
           if (inspectedCardIndices.has(index)) {
             inspectedCardIndices.delete(index);
             cardEl.classList.remove('stage2');

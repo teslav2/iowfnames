@@ -2074,6 +2074,7 @@ body {
   transition: height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.3s ease, box-shadow 0.4s ease;
   pointer-events: none; /* Tıklamaların karta geçmesi için */
   border-radius: 8px;
+  mix-blend-mode: screen; /* Blends black backgrounds to transparent so the otopark shows behind the character */
 }
 
 /* Stage 2 - Slid up / Shrunk cover to reveal word underneath */
@@ -2151,14 +2152,7 @@ body {
   background-position: 9% 9% !important; /* Top-Left: Black Garage card cropped */
 }
 
-/* Takım Renklerine Göre Karakter Kapak Katmanı Hizalaması (Karakter yüklendiğinde tam ekran kaplama) */
-.card-item.color-red .card-character-cover,
-.card-item.color-blue .card-character-cover,
-.card-item.color-neutral .card-character-cover,
-.card-item.color-assassin .card-character-cover {
-  background-size: cover !important;
-  background-position: center !important;
-}
+
 
 /* Stage 2 - Kapağın Yukarı Doğru Menteşeli Olarak Kalkması - KALDIRILDI (Sabit Kart Tasarımı) */
 .card-item.revealed .card-character-cover {
