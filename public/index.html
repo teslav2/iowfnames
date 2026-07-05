@@ -90,10 +90,12 @@
             
             <!-- Tab 1: Feedback (Active by default) -->
             <div class="info-tab-content active" id="tab-feedback">
-              <p class="leader-name-gold" style="font-size: 0.82rem; margin-bottom: 0.8rem; line-height: 1.4; text-align: center;">
-                Oyunu geliştirmeme katkı sağlamak isterseniz geri bildirimlerinizi aşağıdaki kanallardan iletebilirsiniz:
+              <p class="leader-name-gold" style="font-size: 0.82rem; margin-bottom: 0.8rem; line-height: 1.4; text-align: center; margin-top: 0;">
+                Geri bildirimlerinizi aşağıdaki kanallardan iletebilir veya doğrudan form üzerinden gönderebilirsiniz.
               </p>
-              <div class="feedback-list" style="display: flex; flex-direction: column; gap: 0.6rem;">
+              
+              <!-- Social Links -->
+              <div class="feedback-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; width: 100%;">
                 <div class="feedback-item">
                   <a href="https://discord.com/users/603194316201918484" target="_blank" title="Discord'dan Ekle">
                     <i class="fa-brands fa-discord" style="color: #5865F2;"></i> Discord: <strong>Tesla.v2</strong>
@@ -120,21 +122,43 @@
                   </a>
                 </div>
               </div>
+
+              <div class="divider" style="margin: 0.75rem 0;"><span>veya hızlı form</span></div>
+
+              <!-- Interactive Feedback Form -->
+              <form id="feedback-submit-form" onsubmit="return false;" style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="feedback-username" style="font-size: 0.72rem;">Kullanıcı Adınız</label>
+                  <div class="input-wrapper" style="height: 35px;">
+                    <i class="fa-solid fa-user" style="font-size: 0.8rem;"></i>
+                    <input type="text" id="feedback-username" placeholder="İsminiz..." maxlength="25" required style="font-size: 0.8rem;">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="feedback-content" style="font-size: 0.72rem;">Geri Bildiriminiz</label>
+                  <textarea id="feedback-content" placeholder="Mesajınız..." maxlength="1000" required style="width: 100%; min-height: 80px; max-height: 150px; background: rgba(16, 22, 37, 0.6); border: 1px solid var(--panel-border); border-radius: 8px; color: #fff; padding: 0.5rem; outline: none; font-family: var(--font-body); font-size: 0.8rem; resize: vertical; box-sizing: border-box;"></textarea>
+                </div>
+                <button type="submit" id="btn-send-feedback" class="btn btn-primary btn-glow" style="padding: 0.5rem; font-size: 0.82rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.4rem; height: 35px; box-sizing: border-box;">
+                  <i class="fa-solid fa-paper-plane"></i> Gönder
+                </button>
+              </form>
             </div>
 
             <!-- Tab 2: Changelog -->
             <div class="info-tab-content" id="tab-changelog">
               <div class="changelog-item">
                 <div class="changelog-header">
-                  <span class="version">v1.2.5</span>
+                  <span class="version">v1.3.0</span>
                   <span class="date">Bugün</span>
                 </div>
                 <ul>
-                  <li>Lobiye <strong>Neon Parıltı Seçici (Glow Picker)</strong> eklendi! ✨</li>
-                  <li>Sıradaki takıma göre <strong>Dinamik Arka Plan Renk Efekti</strong> (Kırmızı/Mavi) eklendi 🔴🔵</li>
-                  <li>Lobi kullanıcı isimleri takımlarına göre renklendirildi (Kırmızı/Mavi/Gri) 🎨</li>
-                  <li>Oda lideri takıma girdiğinde Hazır Ol (Ready) simgesinin çıkmama sorunu çözüldü 🟢</li>
-                  <li>İletişim paneline Telegram (`@Teslav2`) bağlantısı eklendi ✈️</li>
+                  <li>Masaüstü ve geniş ekranlar için **Ekran Ölçeği / Çözünürlük Ayarı** eklendi! 🖥️</li>
+                  <li>Kelimelerin devasa büyümesini önlemek için **Gelişmiş Kart ve Arayüz Hizalaması** yapıldı.</li>
+                  <li>Sıradaki takımı daha net hissettiren **Gelişmiş Neon Arka Plan Parlamaları** eklendi! 🔴🔵</li>
+                  <li>Süre ve durum paneline sıra göstergesi olarak parıldayan **Dev Yön Okları** yerleştirildi.</li>
+                  <li>Özelleştirilmiş takım isimlerinin geçmiş panelinde (log) görünmeme hatası düzeltildi.</li>
+                  <li>Ekranı kaplayan sohbeti gizlemek için **Sohbeti Gizle/Göster** butonu eklendi.</li>
+                  <li>İletişim paneline **İnteraktif Geri Bildirim Formu** ve `/admin` yönetim arayüzü kuruldu! 📬</li>
                 </ul>
               </div>
             </div>
@@ -168,7 +192,7 @@
                 <h2>IOWFNAMES</h2>
                 <img src="/logos/logo.png" alt="Logo" class="card-header-logo-img">
               </div>
-              <div class="version-display" style="font-size: 0.8rem; color: var(--color-blue); font-weight: 700; margin-top: -0.5rem; margin-bottom: 0.5rem; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0, 210, 255, 0.4); text-align: center;">VERSION: 1.2.5</div>
+              <div class="version-display" style="font-size: 0.8rem; color: var(--color-blue); font-weight: 700; margin-top: -0.5rem; margin-bottom: 0.5rem; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0, 210, 255, 0.4); text-align: center;">VERSION: 1.3.0</div>
               <p>IOWFNAMES Kelimelerin ardındaki gizli bağlantıları keşfedin.<br>
               Takımınızı zafere taşıyın. Tek ipucu. Sayısız ihtimal.</p>
             </div>
@@ -178,6 +202,22 @@
               <div class="input-wrapper">
                 <i class="fa-solid fa-user"></i>
                 <input type="text" id="username-input" placeholder="İsminizi girin..." maxlength="15" value="">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="resolution-scale-select">Ekran Ölçeği / Çözünürlük</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                <select id="resolution-scale-select" style="background: transparent; border: none; color: #fff; width: 100%; outline: none; font-size: 0.85rem; font-family: var(--font-body); cursor: pointer; padding-left: 0.25rem;">
+                  <option value="1.2" style="background: #0b0f19; color: #fff;">%120 (Çok Büyük)</option>
+                  <option value="1.1" style="background: #0b0f19; color: #fff;">%110 (Büyük)</option>
+                  <option value="1.0" style="background: #0b0f19; color: #fff;" selected>%100 (Varsayılan)</option>
+                  <option value="0.9" style="background: #0b0f19; color: #fff;">%90 (Kompakt)</option>
+                  <option value="0.8" style="background: #0b0f19; color: #fff;">%80 (Yayıncı Modu)</option>
+                  <option value="0.7" style="background: #0b0f19; color: #fff;">%70 (Küçük)</option>
+                  <option value="0.6" style="background: #0b0f19; color: #fff;">%60 (Ekstra Küçük)</option>
+                </select>
               </div>
             </div>
   
@@ -218,6 +258,7 @@
               <span class="label">LOBİ KODU</span>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <strong id="display-room-code">------</strong>
+                <button id="btn-toggle-lobby-code" class="small-btn" title="Kodu Gizle/Göster"><i class="fa-solid fa-eye"></i></button>
                 <button id="copy-code-btn" class="small-btn" title="Kodu Kopyala"><i class="fa-solid fa-copy"></i></button>
               </div>
             </div>
@@ -418,7 +459,9 @@
             </div>
             <button class="icon-btn-mini" id="btn-toggle-sound" title="Ses Efektleri Aç/Kapat"><i class="fa-solid fa-volume-high"></i></button>
           </div>
-          <div class="game-topbar-center">
+          <div class="game-topbar-center" style="display: flex; align-items: center; gap: 0.5rem; justify-content: center; position: relative;">
+            <div id="turn-arrow-left" class="turn-arrow left" style="display: none;" title="Sıra Kırmızı Takımda!"><i class="fa-solid fa-angles-left"></i></div>
+            
             <!-- Horizontal Timer -->
             <div class="topbar-timer" id="topbar-timer-wrap">
               <i class="fa-solid fa-hourglass-half timer-pulse-icon"></i>
@@ -428,6 +471,8 @@
             <span class="turn-indicator" id="turn-indicator">
               <i class="fa-solid fa-chess-pawn"></i> <span id="turn-status-text">Sıradaki takım:</span> <strong id="turn-team-name">---</strong>
             </span>
+
+            <div id="turn-arrow-right" class="turn-arrow right" style="display: none;" title="Sıra Mavi Takımda!"><i class="fa-solid fa-angles-right"></i></div>
           </div>
           <div class="game-topbar-right">
             <div class="local-controls" id="local-view-panel" style="display: none;">
@@ -524,13 +569,6 @@
             <div class="game-footer-bar">
               <div class="footer-left-info">
                 <span class="badge online"><i class="fa-solid fa-user"></i> Rolünüz: <strong id="my-role-display">İzleyici</strong></span>
-                <div class="emoji-reaction-bar">
-                  <button class="emoji-btn" data-emoji="👍">👍</button>
-                  <button class="emoji-btn" data-emoji="👎">👎</button>
-                  <button class="emoji-btn" data-emoji="😮">😮</button>
-                  <button class="emoji-btn" data-emoji="😂">😂</button>
-                  <button class="emoji-btn" data-emoji="❗">❗</button>
-                </div>
               </div>
             </div>
           </div>
@@ -562,10 +600,15 @@
             </div>
 
             <!-- Game Chat Panel -->
-            <div class="game-chat-panel">
-              <div class="chat-tabs" id="chat-tabs-container">
-                <button class="chat-tab-btn active" id="tab-genel" data-tab="genel"><i class="fa-solid fa-comments"></i> GENEL SOHBET</button>
-                <button class="chat-tab-btn" id="tab-lider" data-tab="lider" style="display: none;"><i class="fa-solid fa-crown"></i> LİDER SOHBETİ</button>
+            <div class="game-chat-panel" id="game-chat-panel">
+              <div class="chat-tabs" id="chat-tabs-container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; gap: 0.25rem;">
+                  <button class="chat-tab-btn active" id="tab-genel" data-tab="genel" style="margin-right: 0;"><i class="fa-solid fa-comments"></i> GENEL SOHBET</button>
+                  <button class="chat-tab-btn" id="tab-lider" data-tab="lider" style="display: none; margin-right: 0;"><i class="fa-solid fa-crown"></i> LİDER SOHBETİ</button>
+                </div>
+                <button id="toggle-chat-btn" class="chat-tab-btn" title="Sohbeti Gizle/Göster" style="border: none; background: transparent; padding: 0.2rem 0.5rem; cursor: pointer; color: var(--text-muted); font-size: 0.72rem; display: flex; align-items: center; gap: 0.25rem; margin-right: 0;">
+                  <i class="fa-solid fa-eye-slash"></i> Gizle
+                </button>
               </div>
               
               <!-- General Chat Box -->
@@ -640,7 +683,7 @@
           Lobiye Dön
         </button>
         <button id="btn-gameover-close" class="btn btn-secondary">
-          <i class="fa-solid fa-eye"></i> Haritayı İncele
+          <i class="fa-solid fa-eye"></i> Kartları İncele
         </button>
       </div>
     </div>

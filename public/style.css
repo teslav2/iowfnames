@@ -64,11 +64,11 @@ body {
 }
 
 .glow-bg.turn-red {
-  background: radial-gradient(circle at 50% 50%, #3a0a14 0%, #0c0204 100%) !important;
+  background: radial-gradient(circle at 50% 50%, #1a0509 0%, #070102 100%) !important;
 }
 
 .glow-bg.turn-blue {
-  background: radial-gradient(circle at 50% 50%, #08243c 0%, #02090f 100%) !important;
+  background: radial-gradient(circle at 50% 50%, #031220 0%, #01050a 100%) !important;
 }
 
 .glow-sphere {
@@ -76,6 +76,28 @@ body {
   border-radius: 50%;
   filter: blur(140px);
   opacity: 0.12;
+  transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active turn glow enhancements (make the active team's corner sphere highlight beautifully) */
+.glow-bg.turn-red .glow-sphere.red {
+  opacity: 0.36;
+  transform: scale(1.4);
+  filter: blur(100px);
+}
+.glow-bg.turn-red .glow-sphere.blue {
+  opacity: 0.02;
+  transform: scale(0.8);
+}
+
+.glow-bg.turn-blue .glow-sphere.blue {
+  opacity: 0.36;
+  transform: scale(1.4);
+  filter: blur(100px);
+}
+.glow-bg.turn-blue .glow-sphere.red {
+  opacity: 0.02;
+  transform: scale(0.8);
 }
 
 .glow-sphere.red {
@@ -1016,6 +1038,7 @@ body {
   overflow: hidden;
 }
 
+
 .game-left-col, .game-right-col {
   display: flex;
   flex-direction: column;
@@ -1283,6 +1306,9 @@ body {
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
   gap: 0.5rem;
+  max-width: 950px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* Clue Bar below cards */
@@ -1295,6 +1321,9 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 52px;
+  max-width: 950px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .clue-display-mode {
@@ -1467,6 +1496,9 @@ body {
   justify-content: space-between;
   border-top: 1px solid var(--panel-border);
   padding-top: 0.25rem;
+  max-width: 950px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .footer-left-info {
@@ -1622,35 +1654,101 @@ body {
 
 
 .log-entry {
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   line-height: 1.4;
-  padding: 0.25rem 0.45rem;
-  border-radius: 5px;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.01);
   border-left: 2.5px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .log-entry.system {
   border-left-color: var(--text-muted);
 }
 
-.log-entry.red-team {
+.log-entry.red-clue {
   border-left-color: var(--color-red);
-  background: rgba(255, 56, 96, 0.02);
+  background: rgba(255, 56, 96, 0.05);
+}
+.log-entry.red-clue .log-text {
+  color: #ff5e7e !important;
+  font-weight: 700;
 }
 
-.log-entry.blue-team {
+.log-entry.blue-clue {
   border-left-color: var(--color-blue);
-  background: rgba(0, 210, 255, 0.02);
+  background: rgba(0, 210, 255, 0.05);
+}
+.log-entry.blue-clue .log-text {
+  color: #4edaff !important;
+  font-weight: 700;
 }
 
-.log-entry.clue {
-  border-left-color: var(--color-yellow);
-  background: rgba(245, 158, 11, 0.03);
+.log-entry.compact-click-group {
+  border-left-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.log-word-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 1px 2px;
+}
+
+.log-word-badge.red-badge {
+  background: rgba(255, 56, 96, 0.15);
+  color: #ff3860;
+  border: 1px solid rgba(255, 56, 96, 0.3);
+  text-shadow: 0 0 6px rgba(255, 56, 96, 0.3);
+}
+
+.log-word-badge.blue-badge {
+  background: rgba(0, 210, 255, 0.15);
+  color: #00d2ff;
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  text-shadow: 0 0 6px rgba(0, 210, 255, 0.3);
+}
+
+.log-word-badge.neutral-badge {
+  background: rgba(229, 220, 210, 0.15);
+  color: #d8cec4;
+  border: 1px solid rgba(229, 220, 210, 0.25);
+}
+
+.log-word-badge.assassin-badge {
+  background: rgba(0, 0, 0, 0.7);
+  color: #ff3860;
+  border: 1px solid #ff3860;
+  box-shadow: 0 0 10px rgba(255, 56, 96, 0.4);
+  font-weight: 900;
+}
+
+.clue-highlight {
+  font-weight: 800;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .log-text {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.88);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 /* --- BUTTONS & MISC --- */
@@ -1916,28 +2014,32 @@ body {
   background-image: url('logos/spymaster_cards.png') !important;
   background-size: 235% 235% !important;
   background-position: 9% 91% !important; /* Bottom-Left: Red Garage card cropped */
-  border-color: rgba(255, 56, 96, 0.4);
+  border: 2px solid rgba(255, 56, 96, 0.6) !important;
+  box-shadow: 0 0 10px rgba(255, 56, 96, 0.35) !important;
 }
 
 .card-item.is-spymaster.color-blue .card-front {
   background-image: url('logos/spymaster_cards.png') !important;
   background-size: 235% 235% !important;
   background-position: 91% 91% !important; /* Bottom-Right: Blue Garage card cropped */
-  border-color: rgba(0, 210, 255, 0.4);
+  border: 2px solid rgba(0, 210, 255, 0.6) !important;
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.35) !important;
 }
 
 .card-item.is-spymaster.color-neutral .card-front {
   background-image: url('logos/spymaster_cards.png') !important;
   background-size: 235% 235% !important;
   background-position: 91% 9% !important; /* Top-Right: Beige Garage card cropped */
-  border-color: rgba(215, 204, 200, 0.4);
+  border: 2px solid rgba(186, 168, 149, 0.6) !important;
+  box-shadow: 0 0 6px rgba(186, 168, 149, 0.2) !important;
 }
 
 .card-item.is-spymaster.color-assassin .card-front {
   background-image: url('logos/spymaster_cards.png') !important;
   background-size: 235% 235% !important;
   background-position: 9% 9% !important; /* Top-Left: Black Garage card cropped */
-  border-color: rgba(17, 17, 17, 0.4);
+  border: 2px solid rgba(255, 56, 96, 0.8) !important;
+  box-shadow: 0 0 14px rgba(255, 56, 96, 0.45) !important;
 }
 
 /* AÇILAN KART YÜZÜ (Geriye Dönük Base Layer - Garaj Kartı) */
@@ -1956,14 +2058,24 @@ body {
 /* Menteşeli Karakter Kapağı (Karakter Görseli Katmanı) */
 .card-character-cover {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 2;
   background-size: 235% 235% !important;
   background-repeat: no-repeat !important;
   transform-origin: top;
-  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  transition: height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.45s ease, box-shadow 0.4s ease;
   pointer-events: none; /* Tıklamaların karta geçmesi için */
   border-radius: 8px;
+}
+
+/* Stage 2 - Slid up / Shrunk cover to reveal word underneath */
+.card-item.stage2 .card-character-cover {
+  height: 70% !important;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 /* Karakter İsim Rozeti (Sağ Üst - Kapağa bağlı) */
@@ -2044,6 +2156,55 @@ body {
   transform: none !important;
 }
 
+/* Team Card Glows & Borders in Gameplay (Revealed States) */
+.card-item.color-red.revealed .card-back {
+  border: 2px solid #ff3860 !important;
+  box-shadow: 0 0 16px rgba(255, 56, 96, 0.65), inset 0 0 12px rgba(255, 56, 96, 0.35) !important;
+}
+
+.card-item.color-blue.revealed .card-back {
+  border: 2px solid #00D2FF !important;
+  box-shadow: 0 0 16px rgba(0, 210, 255, 0.65), inset 0 0 12px rgba(0, 210, 255, 0.35) !important;
+}
+
+.card-item.color-neutral.revealed .card-back {
+  border: 2px solid #baa895 !important;
+  box-shadow: 0 0 10px rgba(186, 168, 149, 0.35), inset 0 0 6px rgba(186, 168, 149, 0.2) !important;
+}
+
+.card-item.color-assassin.revealed .card-back {
+  border: 2px solid #ff3860 !important;
+  box-shadow: 0 0 22px rgba(255, 56, 96, 0.85), inset 0 0 16px rgba(255, 56, 96, 0.55) !important;
+}
+
+/* Color specific card word plates in Stage 2 (Matching reference image) */
+.card-item.color-red.revealed.stage2 .card-back .card-word {
+  background: #9c1624 !important; /* Rich crimson red background */
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 3px rgba(255, 255, 255, 0.15) !important;
+}
+
+.card-item.color-blue.revealed.stage2 .card-back .card-word {
+  background: #0b437a !important; /* Rich cobalt blue background */
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 3px rgba(255, 255, 255, 0.15) !important;
+}
+
+.card-item.color-neutral.revealed.stage2 .card-back .card-word {
+  background: #cfc0ab !important; /* Linen sand beige background */
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #271a15 !important; /* Dark brown text for contrast */
+  text-shadow: none !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.18), inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
+}
+
+.card-item.color-assassin.revealed.stage2 .card-back .card-word {
+  background: #111111 !important; /* Deep charcoal black background */
+  border-color: #ff3860 !important;
+  color: #ff3860 !important;
+  box-shadow: 0 -4px 12px rgba(255, 56, 96, 0.25) !important;
+}
+
 /* Kelime Etiketleri */
 .card-word {
   font-family: var(--font-display);
@@ -2083,10 +2244,19 @@ body {
   box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05), 0 0 12px rgba(0, 210, 255, 0.35);
 }
 
-/* Kelime Her Zaman Görünür */
+/* Kelime Her Zaman Görünür - GİZLENDİ: Stage 1'de gizli, Stage 2'de kayarak açılır */
 .card-item.revealed .card-back .card-word {
   display: flex;
-  color: #ffffff;
+  opacity: 0;
+  transform: translateY(20px) scale(0.92);
+  pointer-events: none;
+  transition: opacity 0.38s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.38s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-item.revealed.stage2 .card-back .card-word {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 /* --- KART DÜŞÜNME / ONAYLAMA SİSTEMİ --- */
@@ -3508,5 +3678,52 @@ body {
 .lobby-join-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+}
+
+/* Collapsed chat panel states */
+.game-chat-panel.collapsed .chat-messages,
+.game-chat-panel.collapsed .game-chat-form {
+  display: none !important;
+}
+.game-chat-panel.collapsed {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  border-bottom: none !important;
+}
+
+/* Giant turn direction indicators next to timer */
+.turn-arrow {
+  font-size: 2.4rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  animation: arrowPulse 1.2s infinite ease-in-out;
+  user-select: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.turn-arrow.left {
+  left: -50px;
+  color: var(--color-red);
+  text-shadow: 0 0 15px rgba(255, 56, 96, 0.8);
+}
+
+.turn-arrow.right {
+  right: -50px;
+  color: var(--color-blue);
+  text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
+}
+
+@keyframes arrowPulse {
+  0%, 100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.22);
+    opacity: 1;
+  }
 }
 

@@ -40,8 +40,7 @@ let myPlayerInfo = {
   team: "spectator",
   role: "agent",
   isHost: true,
-  isBot: false,
-  emoji: null
+  isBot: false
 };
 let activeRoomCode = "";
 let roomAdminId = "";
@@ -56,6 +55,7 @@ let lastTurnTeam = '';
 let lastTurnRole = '';
 let soundMuted = false;
 let roomCodeHidden = false;
+let inspectedCardIndices = new Set();
 let winnerModalDismissed = false;
 let isAutoReconnecting = false;
 
@@ -287,7 +287,7 @@ if (typeof io !== 'undefined') {
     safeSetStorage('roomCode', roomCode);
     safeSetStorage('playerName', player.name);
 
-    safeSetText(displayRoomCode, roomCode);
+    syncRoomCodeDisplay();
     switchScreen(screenLobby);
   });
 
@@ -299,7 +299,7 @@ if (typeof io !== 'undefined') {
     safeSetStorage('roomCode', roomCode);
     safeSetStorage('playerName', player.name);
 
-    safeSetText(displayRoomCode, roomCode);
+    syncRoomCodeDisplay();
     switchScreen(screenLobby);
   });
 
@@ -421,11 +421,6 @@ if (typeof io !== 'undefined') {
 
   socket.on('leaderChatMsg', (msg) => {
     appendChatBubble(msg, 'lider');
-  });
-
-  socket.on('emojiTriggered', ({ playerId, emoji }) => {
-    triggerEmojiVisualEffect(playerId, emoji);
-    triggerFloatingEmoji(emoji);
   });
 }
 
@@ -838,52 +833,7 @@ function appendChatBubble(msg, type = 'genel') {
   }
 }
 
-// --- EMOJI REACTION PANEL ---
-document.querySelectorAll('.emoji-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    const emoji = e.currentTarget.dataset.emoji;
-    if (socket) socket.emit('sendEmoji', { emoji });
-  });
-});
 
-function triggerEmojiVisualEffect(playerId, emoji) {
-  const els = document.querySelectorAll(`[data-player-row-id="${playerId}"] .player-emoji-slot`);
-  els.forEach(el => {
-    el.innerHTML = `<span class="emoji-reaction-bubble">${emoji}</span>`;
-    setTimeout(() => {
-      el.innerHTML = '';
-    }, 3000);
-  });
-}
-
-function triggerFloatingEmoji(emoji) {
-  const container = document.getElementById('floating-reactions-container');
-  if (!container) return;
-
-  const item = document.createElement('div');
-  item.className = 'floating-emoji-item';
-  item.textContent = emoji;
-
-  // Random positioning and scaling parameters for realistic floating feel
-  const randomLeft = 20 + Math.random() * 60;
-  const randomDrift = (Math.random() - 0.5) * 100;
-  const randomScale = 0.8 + Math.random() * 0.7;
-  const randomRotate = (Math.random() - 0.5) * 50;
-  const randomDuration = 1.6 + Math.random() * 0.6;
-
-  item.style.left = `${randomLeft}%`;
-  item.style.setProperty('--drift-x', `${randomDrift}px`);
-  item.style.setProperty('--rotate-deg', `${randomRotate}deg`);
-  item.style.transform = `scale(${randomScale})`;
-  item.style.animationDuration = `${randomDuration}s`;
-
-  container.appendChild(item);
-
-  // Auto clean up after animation completes
-  setTimeout(() => {
-    item.remove();
-  }, randomDuration * 1000);
-}
 
 // --- ADMIN PLAYERS MANAGEMENT PANEL ---
 function renderLobbyPlayersAdminList(players) {
@@ -917,7 +867,6 @@ function renderLobbyPlayersAdminList(players) {
       <div class="lobby-user-details">
         <i class="fa-solid ${p.role === 'spymaster' ? 'fa-user-tie' : 'fa-shield-halved'} text-${p.team}"></i>
         <span><strong>${escapeHTML(p.name)}</strong> ${p.isHost ? '<span class="host-badge"><i class="fa-solid fa-crown"></i> HOST</span>' : ''} (${teamName} ${roleName})</span>
-        <span class="player-emoji-slot">${p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : ''}</span>
         ${!p.connected ? '<span class="offline-badge">(Bağlantı Koptu)</span>' : ''}
       </div>
       ${actionHTML}
@@ -1130,6 +1079,22 @@ function renderGame(gameState, playersList, roomSettings) {
     }
   }
 
+  // Sync turn direction arrows next to timer
+  const arrowLeft = document.getElementById('turn-arrow-left');
+  const arrowRight = document.getElementById('turn-arrow-right');
+  if (arrowLeft && arrowRight) {
+    if (turn.team === 'red') {
+      arrowLeft.style.display = 'flex';
+      arrowRight.style.display = 'none';
+    } else if (turn.team === 'blue') {
+      arrowLeft.style.display = 'none';
+      arrowRight.style.display = 'flex';
+    } else {
+      arrowLeft.style.display = 'none';
+      arrowRight.style.display = 'none';
+    }
+  }
+
   // Turn Change Audio Feedback
   if (lastTurnTeam !== turn.team || lastTurnRole !== turn.role) {
     const isFirstRun = lastTurnTeam === '';
@@ -1177,14 +1142,7 @@ function renderGame(gameState, playersList, roomSettings) {
     }
   }
 
-  const gameRoomCodeValEl = document.getElementById('game-room-code-val');
-  if (gameRoomCodeValEl) {
-    if (roomCodeHidden) {
-      gameRoomCodeValEl.textContent = '••••••';
-    } else {
-      gameRoomCodeValEl.textContent = activeRoomCode;
-    }
-  }
+  syncRoomCodeDisplay();
 
   // 1. Sync custom team names
   if (gameState.teamNames) {
@@ -1332,6 +1290,12 @@ function renderGame(gameState, playersList, roomSettings) {
       cardsGrid.innerHTML = '';
     }
 
+    // Clear local inspection memory if no cards are revealed (e.g. game restarted)
+    const revealedCount = gameState.board.filter(c => c.revealed).length;
+    if (revealedCount === 0) {
+      inspectedCardIndices.clear();
+    }
+
     gameState.board.forEach((card, index) => {
       if (gameState.winner) { card.revealed = true; }
       let cardEl;
@@ -1378,8 +1342,10 @@ function renderGame(gameState, playersList, roomSettings) {
       const isNowRevealed = isCardRevealed;
       const isNewlyRevealed = !wasRevealed && isNowRevealed;
 
+      const isInspected = inspectedCardIndices.has(index);
       const targetClassName = `card-item color-${card.color}` +
         (isCardRevealed ? ` revealed` : '') +
+        (isCardRevealed && isInspected ? ` stage2` : '') +
         (isSpymasterView ? ' is-spymaster' : '');
 
       if (cardEl.dataset.state !== cardStateString) {
@@ -1450,6 +1416,16 @@ function renderGame(gameState, playersList, roomSettings) {
           if (isMyTurnToGuess) {
             if (socket) socket.emit('toggleThinking', { cardIndex: index });
           }
+        } else {
+          // Card is already revealed! Toggle Stage 2 (Inspect Word) locally
+          if (inspectedCardIndices.has(index)) {
+            inspectedCardIndices.delete(index);
+            cardEl.classList.remove('stage2');
+          } else {
+            inspectedCardIndices.add(index);
+            cardEl.classList.add('stage2');
+          }
+          playLocalSound('click-correct');
         }
       };
       cardEl.addEventListener('click', cardEl._clickHandler);
@@ -1464,51 +1440,85 @@ function renderGame(gameState, playersList, roomSettings) {
   // 9. Activity logs
   if (logMessages) {
     logMessages.innerHTML = '';
+    
+    // Group consecutive card clicks by the same player to save vertical space
+    const groupedEntries = [];
     gameState.log.forEach(entry => {
-      const entryDiv = document.createElement('div');
-      let customClass = 'system';
-      let formattedText = entry.text;
-
       if (entry.text.includes('ipucu verdi:')) {
-        customClass = 'clue';
-        const isRed = entry.text.includes('Kırmızı Anlatıcı') || entry.text.includes('Kırmızı');
-        const teamName = isRed
-          ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI')
-          : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ');
-
-        const matchWord = entry.text.match(/"([^"]+)"/);
-        const clueText = matchWord ? matchWord[1] : '';
-        formattedText = `💡 ${teamName} İpucu: ${clueText}`;
-      }
-      else if (entry.text.includes('kartını açtı. Sonuç:')) {
+        groupedEntries.push({ type: 'clue', text: entry.text });
+      } else if (entry.text.includes('kartını açtı. Sonuç:')) {
         const parts = entry.text.split(' ');
         const playerName = parts[0];
         const matchWord = entry.text.match(/"([^"]+)"/);
-        const clickedWord = matchWord ? matchWord[1] : '';
+        const word = matchWord ? matchWord[1] : '';
 
-        let statusStr = '';
-        if (entry.text.includes('Kırmızı Ekip 🔴') || entry.text.includes('Mavi Ekip 🔵')) {
-          const isRedEkip = entry.text.includes('Kırmızı Ekip 🔴');
-          const isCorrect = (isRedEkip && entry.text.includes('Kırmızı')) || (!isRedEkip && entry.text.includes('Mavi'));
-          statusStr = isCorrect ? '<span class="guess-status correct">✓ Doğru</span>' : '<span class="guess-status wrong">X Hata</span>';
-          customClass = isRedEkip ? 'red-team' : 'blue-team';
+        let cardColor = 'neutral';
+        if (entry.text.includes('Kırmızı Ekip 🔴')) {
+          cardColor = 'red';
+        } else if (entry.text.includes('Mavi Ekip 🔵')) {
+          cardColor = 'blue';
         } else if (entry.text.includes('Masum Sivil ⚪')) {
-          statusStr = '<span class="guess-status neutral">- Tarafsız</span>';
-          customClass = 'system';
-        } else {
-          statusStr = '<span class="guess-status wrong">💀 Tetikçi</span>';
-          customClass = 'system';
+          cardColor = 'neutral';
+        } else if (entry.text.includes('Tetikçi') || (!entry.text.includes('Masum Sivil') && !entry.text.includes('Kırmızı Ekip') && !entry.text.includes('Mavi Ekip'))) {
+          cardColor = 'assassin';
         }
 
-        formattedText = `👤 ${playerName} ➔ ${clickedWord} (${statusStr})`;
-      }
-      else if (entry.text.includes('sırasını savdı. Pas geçildi.')) {
+        const lastItem = groupedEntries[groupedEntries.length - 1];
+        if (lastItem && lastItem.type === 'click' && lastItem.playerName === playerName) {
+          lastItem.clicks.push({ word, cardColor });
+        } else {
+          groupedEntries.push({
+            type: 'click',
+            playerName,
+            clicks: [{ word, cardColor }]
+          });
+        }
+      } else if (entry.text.includes('sırasını savdı. Pas geçildi.')) {
         const playerName = entry.text.split(' ')[0];
-        formattedText = `🔄 ${playerName} turu sonlandırdı`;
+        groupedEntries.push({ type: 'pass', playerName });
+      } else {
+        groupedEntries.push({ type: 'system', text: entry.text });
+      }
+    });
+
+    // Render grouped entries
+    groupedEntries.forEach(entry => {
+      const entryDiv = document.createElement('div');
+      let customClass = 'system';
+      let formattedHTML = '';
+
+      if (entry.type === 'clue') {
+        const redTeamName = gameState.teamNames ? gameState.teamNames.red : 'Kırmızı';
+        const isRed = entry.text.includes(`${redTeamName} Anlatıcı`) || entry.text.includes(redTeamName) || entry.text.includes('Kırmızı');
+        const teamName = isRed
+          ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
+          : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
+
+        const matchWord = entry.text.match(/"([^"]+)"/);
+        const clueText = matchWord ? matchWord[1] : '';
+        
+        customClass = isRed ? 'red-clue' : 'blue-clue';
+        formattedHTML = `<span class="log-icon">💡</span> <strong style="text-transform: uppercase;">${teamName}</strong> İpucu: <span class="clue-highlight">${clueText}</span>`;
+      }
+      else if (entry.type === 'click') {
+        customClass = 'compact-click-group';
+        let badgesHTML = '';
+        entry.clicks.forEach(click => {
+          badgesHTML += `<span class="log-word-badge ${click.cardColor}-badge">${escapeHTML(click.word)}</span>`;
+        });
+        formattedHTML = `<span class="log-icon">👤</span> <strong class="player-name">${escapeHTML(entry.playerName)}</strong> ➔ ${badgesHTML}`;
+      }
+      else if (entry.type === 'pass') {
+        customClass = 'system';
+        formattedHTML = `<span class="log-icon">🔄</span> <strong class="player-name">${escapeHTML(entry.playerName)}</strong> turu sonlandırdı`;
+      }
+      else {
+        customClass = 'system';
+        formattedHTML = escapeHTML(entry.text);
       }
 
       entryDiv.className = `log-entry ${customClass}`;
-      entryDiv.innerHTML = `<span class="log-text">${formattedText}</span>`;
+      entryDiv.innerHTML = `<span class="log-text">${formattedHTML}</span>`;
       logMessages.appendChild(entryDiv);
     });
 
@@ -1526,6 +1536,11 @@ function renderGame(gameState, playersList, roomSettings) {
       winnerTeamText.className = `text-${gameState.winner}`;
     }
     safeSetText(winnerReasonText, `${wTeamName} tüm kelimeleri bularak oyunu kazandı!`);
+
+    const isAdmin = socket.id === roomAdminId;
+    safeSetDisplay(btnGameoverRestart, isAdmin ? 'block' : 'none');
+    safeSetDisplay(btnGameoverLobby, isAdmin ? 'block' : 'none');
+    safeSetDisplay(btnGameoverClose, isAdmin ? 'block' : 'none');
 
     if (gameoverModal && !gameoverModal.classList.contains('active') && !winnerModalDismissed) {
       playLocalSound('victory');
@@ -1607,21 +1622,42 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// --- GAME TOPBAR ACTIONS ---
+// --- GAME & LOBBY TOPBAR ROOM CODE ACTIONS ---
+function syncRoomCodeDisplay() {
+  const displayRoomCodeEl = document.getElementById('display-room-code');
+  const gameRoomCodeValEl = document.getElementById('game-room-code-val');
+  const btnToggleLobbyCode = document.getElementById('btn-toggle-lobby-code');
+  const btnToggleRoomCode = document.getElementById('btn-toggle-room-code');
+
+  const visibleText = activeRoomCode || '------';
+  const hiddenText = '******'; // Star mask as requested by user
+
+  if (roomCodeHidden) {
+    if (displayRoomCodeEl) displayRoomCodeEl.textContent = hiddenText;
+    if (gameRoomCodeValEl) gameRoomCodeValEl.textContent = hiddenText;
+    if (btnToggleLobbyCode) btnToggleLobbyCode.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+    if (btnToggleRoomCode) btnToggleRoomCode.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+  } else {
+    if (displayRoomCodeEl) displayRoomCodeEl.textContent = visibleText;
+    if (gameRoomCodeValEl) gameRoomCodeValEl.textContent = visibleText;
+    if (btnToggleLobbyCode) btnToggleLobbyCode.innerHTML = '<i class="fa-solid fa-eye"></i>';
+    if (btnToggleRoomCode) btnToggleRoomCode.innerHTML = '<i class="fa-solid fa-eye"></i>';
+  }
+}
+
 const btnToggleRoomCode = document.getElementById('btn-toggle-room-code');
-const gameRoomCodeVal = document.getElementById('game-room-code-val');
 if (btnToggleRoomCode) {
   btnToggleRoomCode.addEventListener('click', () => {
     roomCodeHidden = !roomCodeHidden;
-    if (gameRoomCodeVal) {
-      if (roomCodeHidden) {
-        gameRoomCodeVal.textContent = '••••••';
-        btnToggleRoomCode.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
-      } else {
-        gameRoomCodeVal.textContent = activeRoomCode;
-        btnToggleRoomCode.innerHTML = '<i class="fa-solid fa-eye"></i>';
-      }
-    }
+    syncRoomCodeDisplay();
+  });
+}
+
+const btnToggleLobbyCode = document.getElementById('btn-toggle-lobby-code');
+if (btnToggleLobbyCode) {
+  btnToggleLobbyCode.addEventListener('click', () => {
+    roomCodeHidden = !roomCodeHidden;
+    syncRoomCodeDisplay();
   });
 }
 
@@ -1841,3 +1877,73 @@ if (socket) {
     }
   });
 }
+// ============ RESOLUTION / ZOOM SCALE CONTROLLER ============
+const scaleSelect = document.getElementById('resolution-scale-select');
+
+function applyAppScale(scale) {
+  document.body.style.zoom = scale;
+}
+
+// Load and apply saved scale choice on page startup
+const savedScale = safeGetStorage('appScale') || '1.0';
+applyAppScale(savedScale);
+
+if (scaleSelect) {
+  scaleSelect.value = savedScale;
+  scaleSelect.addEventListener('change', (e) => {
+    const scale = e.target.value;
+    applyAppScale(scale);
+    safeSetStorage('appScale', scale);
+  });
+}
+
+// ============ CHAT TOGGLE CONTROLLER ============
+const toggleChatBtn = document.getElementById('toggle-chat-btn');
+const gameChatPanel = document.getElementById('game-chat-panel');
+if (toggleChatBtn && gameChatPanel) {
+  toggleChatBtn.addEventListener('click', () => {
+    const isCollapsed = gameChatPanel.classList.toggle('collapsed');
+    if (isCollapsed) {
+      toggleChatBtn.innerHTML = '<i class="fa-solid fa-eye"></i> Göster';
+      toggleChatBtn.title = "Sohbeti Göster";
+    } else {
+      toggleChatBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Gizle';
+      toggleChatBtn.title = "Sohbeti Gizle";
+    }
+  });
+}
+
+// ============ INTERACTIVE FEEDBACK FORM SUBMITTER ============
+const feedbackForm = document.getElementById('feedback-submit-form');
+const feedbackUserField = document.getElementById('feedback-username');
+const feedbackContentField = document.getElementById('feedback-content');
+
+if (feedbackForm) {
+  feedbackForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = feedbackUserField ? feedbackUserField.value.trim() : 'Anonim';
+    const text = feedbackContentField ? feedbackContentField.value.trim() : '';
+
+    if (!text) return;
+
+    fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, text })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert("Geri bildiriminiz başarıyla iletildi! Çok teşekkür ederiz. 😊");
+          if (feedbackContentField) feedbackContentField.value = '';
+        } else {
+          alert("Geri bildirim gönderilemedi, lütfen tekrar deneyin.");
+        }
+      })
+      .catch(err => {
+        console.error('Feedback submit error:', err);
+        alert("Geri bildirim gönderilirken bağlantı hatası oluştu.");
+      });
+  });
+}
+

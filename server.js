@@ -17,6 +17,202 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware for parsing JSON requests (needed for feedback submission)
+app.use(express.json());
+
+// Feedbacks Data Helpers
+const FEEDBACKS_FILE = path.join(__dirname, 'feedbacks.json');
+
+function getFeedbacks() {
+  try {
+    if (!fs.existsSync(FEEDBACKS_FILE)) {
+      return [];
+    }
+    const data = fs.readFileSync(FEEDBACKS_FILE, 'utf8');
+    return JSON.parse(data || '[]');
+  } catch (e) {
+    console.error("getFeedbacks error:", e);
+    return [];
+  }
+}
+
+function saveFeedback(feedback) {
+  try {
+    const list = getFeedbacks();
+    list.push(feedback);
+    fs.writeFileSync(FEEDBACKS_FILE, JSON.stringify(list, null, 2), 'utf8');
+    return true;
+  } catch (e) {
+    console.error("saveFeedback error:", e);
+    return false;
+  }
+}
+
+// REST API: Submit new feedback
+app.post('/api/feedback', (req, res) => {
+  try {
+    const { name, text } = req.body;
+    if (!text) {
+      return res.status(400).json({ success: false, error: 'Mesaj boş olamaz.' });
+    }
+
+    const time = new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });
+    const success = saveFeedback({
+      name: name ? name.trim() : 'Anonim',
+      text: text.trim(),
+      time
+    });
+
+    res.json({ success });
+  } catch (e) {
+    console.error('API feedback post error:', e);
+    res.status(500).json({ success: false, error: 'Sunucu hatası.' });
+  }
+});
+
+// REST Route: Admin dashboard showing all feedbacks in a cyberpunk list
+app.get('/admin', (req, res) => {
+  try {
+    const feedbacksList = getFeedbacks().reverse(); // Show latest first
+    
+    // Simple inline styled Cyberpunk admin dashboard page
+    let tableRows = '';
+    if (feedbacksList.length === 0) {
+      tableRows = `<tr><td colspan="3" style="text-align: center; color: #ff3860; padding: 2rem;">Henüz geri bildirim alınmadı.</td></tr>`;
+    } else {
+      feedbacksList.forEach(fb => {
+        tableRows += `
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.2s;">
+            <td style="padding: 1rem; color: #ffd700; font-weight: bold; font-family: 'Space Grotesk', sans-serif;">${escapeHTMLString(fb.name)}</td>
+            <td style="padding: 1rem; color: #e5e7eb; white-space: pre-wrap; font-size: 0.9rem;">${escapeHTMLString(fb.text)}</td>
+            <td style="padding: 1rem; color: #00d2ff; font-size: 0.8rem; white-space: nowrap;">${fb.time}</td>
+          </tr>
+        `;
+      });
+    }
+
+    const adminHTML = `
+      <!DOCTYPE html>
+      <html lang="tr">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>IOWFNAMES - Geri Bildirim Yönetim Paneli</title>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+          body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 56, 96, 0.05) 0%, transparent 40%);
+          }
+          .admin-card {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(16, 22, 37, 0.65);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.1);
+            backdrop-filter: blur(10px);
+          }
+          header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0, 210, 255, 0.3);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+          }
+          h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            background: linear-gradient(90deg, #00d2ff, #ff3860);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+          }
+          .home-btn {
+            background: rgba(0, 210, 255, 0.1);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+          }
+          .home-btn:hover {
+            background: rgba(0, 210, 255, 0.2);
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+            color: #fff;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+          }
+          th {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+          }
+          tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+          }
+        </style>
+      </head>
+      <body>
+        <div class="admin-card">
+          <header>
+            <h1><i class="fa-solid fa-comments"></i> Geri Bildirim Yönetimi</h1>
+            <a href="/" class="home-btn"><i class="fa-solid fa-house"></i> Oyuna Dön</a>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 25%;">Gönderen</th>
+                <th style="width: 55%;">Geri Bildirim Mesajı</th>
+                <th style="width: 20%;">Tarih</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </div>
+      </body>
+      </html>
+    `;
+    res.send(adminHTML);
+  } catch (e) {
+    console.error('Admin route error:', e);
+    res.status(500).send('Admin paneli yüklenirken hata oluştu.');
+  }
+});
+
+// Helper function to escape HTML strings for safety
+function escapeHTMLString(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 // REST API: Get public lobby list
 app.get('/api/lobbies', (req, res) => {
   try {
@@ -360,7 +556,6 @@ io.on('connection', (socket) => {
         isHost: true,
         isBot: false,
         connected: true,
-        emoji: null,
         ready: true,
         glow: 'none'
       };
@@ -446,7 +641,6 @@ io.on('connection', (socket) => {
           isHost: false,
           isBot: false,
           connected: true,
-          emoji: null,
           ready: false,
           glow: 'none'
         };
@@ -980,34 +1174,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 17. Send Emoji Reaction
-  socket.on('sendEmoji', ({ emoji }) => {
-    try {
-      if (!currentRoomCode || !rooms[currentRoomCode]) return;
-      const room = rooms[currentRoomCode];
-      const player = room.players.find(p => p.id === socket.id);
-      if (!player) return;
-
-      player.emoji = emoji;
-      io.to(currentRoomCode).emit('emojiTriggered', { playerId: player.id, emoji });
-
-      // Automatically reset player emoji status after 3 seconds
-      setTimeout(() => {
-        const r = rooms[currentRoomCode];
-        if (r) {
-          const p = r.players.find(x => x.id === player.id);
-          if (p) {
-            p.emoji = null;
-            io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
-          }
-        }
-      }, 3000);
-
-      io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
-    } catch (e) {
-      console.error("sendEmoji error:", e);
-    }
-  });
 
   // 18. Send Chat Message
   socket.on('sendChat', ({ text }) => {
