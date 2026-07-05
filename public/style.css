@@ -44,8 +44,8 @@ body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
   color: var(--text-main);
-  overflow: hidden; /* Prevent scroll */
-  height: 100vh;
+  overflow-y: auto; /* Allow scroll if zoomed/small screen */
+  min-height: 100vh;
   position: relative;
 }
 
@@ -120,9 +120,9 @@ body {
 .app-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   padding: 0 1rem;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* --- HEADER (Compact, 50px height) --- */
@@ -177,8 +177,9 @@ body {
 
 /* --- MAIN CONTENT --- */
 .main-content {
-  height: calc(100vh - 50px);
-  overflow: hidden;
+  min-height: calc(100vh - 50px);
+  height: auto;
+  overflow: visible;
   position: relative;
 }
 
