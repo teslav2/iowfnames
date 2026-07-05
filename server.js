@@ -19,6 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware for parsing JSON requests (needed for feedback submission)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Feedbacks Data Helpers
 const FEEDBACKS_FILE = path.join(__dirname, 'feedbacks.json');
@@ -70,15 +71,176 @@ app.post('/api/feedback', (req, res) => {
   }
 });
 
-// REST Route: Admin dashboard showing all feedbacks in a cyberpunk list
+// Helper to check if admin is authenticated via cookies
+function checkAdminAuth(req) {
+  try {
+    if (!req.headers.cookie) return false;
+    const cookies = Object.fromEntries(
+      req.headers.cookie.split(';').map(c => {
+        const parts = c.trim().split('=');
+        return [parts[0], parts.slice(1).join('=')];
+      })
+    );
+    return cookies.admin_session === 'authenticated_3131';
+  } catch (e) {
+    console.error('checkAdminAuth error:', e);
+    return false;
+  }
+}
+
+// POST Route: Login handler for admin password check
+app.post('/admin/login', (req, res) => {
+  const { password } = req.body;
+  if (password === '3131') {
+    // Set a session cookie valid for 7 days
+    res.setHeader('Set-Cookie', 'admin_session=authenticated_3131; Path=/; HttpOnly; Max-Age=604800');
+    return res.redirect('/admin');
+  }
+  res.redirect('/admin?error=1');
+});
+
+// POST Route: Delete a specific feedback entry by its index
+app.post('/admin/delete-feedback', (req, res) => {
+  try {
+    if (!checkAdminAuth(req)) {
+      return res.status(401).json({ success: false, error: 'Yetkisiz erişim.' });
+    }
+
+    const { index } = req.body;
+    if (index === undefined || index === null) {
+      return res.status(400).json({ success: false, error: 'Geçersiz dizin.' });
+    }
+
+    const feedbacks = getFeedbacks();
+    const targetIndex = parseInt(index);
+    if (isNaN(targetIndex) || targetIndex < 0 || targetIndex >= feedbacks.length) {
+      return res.status(400).json({ success: false, error: 'Dizin bulunamadı.' });
+    }
+
+    // Remove feedback at index
+    feedbacks.splice(targetIndex, 1);
+    fs.writeFileSync(FEEDBACKS_FILE, JSON.stringify(feedbacks, null, 2), 'utf8');
+
+    res.json({ success: true });
+  } catch (e) {
+    console.error('Delete feedback error:', e);
+    res.status(500).json({ success: false, error: 'Sunucu hatası.' });
+  }
+});
+
+// REST Route: Admin dashboard showing all feedbacks with authentication & deletion
 app.get('/admin', (req, res) => {
   try {
-    const feedbacksList = getFeedbacks().reverse(); // Show latest first
+    const errorParam = req.query.error;
+
+    // 1. Render Login Screen if not authenticated
+    if (!checkAdminAuth(req)) {
+      const loginHTML = `
+        <!DOCTYPE html>
+        <html lang="tr">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>IOWFNAMES - Admin Girişi</title>
+          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          <style>
+            body {
+              background-color: #0b0f19;
+              color: #ffffff;
+              font-family: 'Outfit', sans-serif;
+              margin: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              background-image: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.05) 0%, transparent 60%);
+            }
+            .login-card {
+              background: rgba(16, 22, 37, 0.85);
+              border: 1px solid rgba(0, 210, 255, 0.25);
+              border-radius: 16px;
+              padding: 2.5rem;
+              width: 100%;
+              max-width: 400px;
+              box-shadow: 0 0 35px rgba(0, 210, 255, 0.15);
+              backdrop-filter: blur(10px);
+              text-align: center;
+            }
+            h2 {
+              font-family: 'Space Grotesk', sans-serif;
+              margin-top: 0;
+              margin-bottom: 1.5rem;
+              background: linear-gradient(90deg, #00d2ff, #ff3860);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            }
+            input {
+              width: 100%;
+              background: rgba(0,0,0,0.35);
+              border: 1px solid rgba(255,255,255,0.1);
+              border-radius: 8px;
+              padding: 0.75rem 1rem;
+              color: #fff;
+              font-size: 1rem;
+              margin-bottom: 1.5rem;
+              text-align: center;
+              outline: none;
+              box-sizing: border-box;
+              font-family: var(--font-body);
+            }
+            input:focus {
+              border-color: #00d2ff;
+              box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+            }
+            button {
+              width: 100%;
+              background: linear-gradient(135deg, #00d2ff, #0088cc);
+              color: white;
+              border: none;
+              padding: 0.75rem;
+              border-radius: 8px;
+              font-weight: bold;
+              font-size: 1rem;
+              cursor: pointer;
+              transition: all 0.3s;
+            }
+            button:hover {
+              box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+              transform: translateY(-1px);
+            }
+            .error-msg {
+              color: #ff3860;
+              font-size: 0.85rem;
+              margin-bottom: 1rem;
+              font-weight: bold;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="login-card">
+            <h2><i class="fa-solid fa-lock"></i> Yönetici Girişi</h2>
+            ${errorParam ? `<div class="error-msg">Hatalı Şifre! Lütfen tekrar deneyin.</div>` : ''}
+            <form action="/admin/login" method="POST">
+              <input type="password" name="password" placeholder="Yönetici Şifresi..." required autofocus autocomplete="off">
+              <button type="submit">Giriş Yap</button>
+            </form>
+          </div>
+        </body>
+        </html>
+      `;
+      return res.send(loginHTML);
+    }
+
+    // 2. Render authenticated Admin Dashboard
+    // Map with original indices before reversing to ensure correct deletion index mapping
+    const feedbacksList = getFeedbacks()
+      .map((fb, idx) => ({ ...fb, originalIndex: idx }))
+      .reverse(); // Show latest first
     
-    // Simple inline styled Cyberpunk admin dashboard page
     let tableRows = '';
     if (feedbacksList.length === 0) {
-      tableRows = `<tr><td colspan="3" style="text-align: center; color: #ff3860; padding: 2rem;">Henüz geri bildirim alınmadı.</td></tr>`;
+      tableRows = `<tr><td colspan="4" style="text-align: center; color: #ff3860; padding: 2rem;">Henüz geri bildirim alınmadı.</td></tr>`;
     } else {
       feedbacksList.forEach(fb => {
         tableRows += `
@@ -86,6 +248,11 @@ app.get('/admin', (req, res) => {
             <td style="padding: 1rem; color: #ffd700; font-weight: bold; font-family: 'Space Grotesk', sans-serif;">${escapeHTMLString(fb.name)}</td>
             <td style="padding: 1rem; color: #e5e7eb; white-space: pre-wrap; font-size: 0.9rem;">${escapeHTMLString(fb.text)}</td>
             <td style="padding: 1rem; color: #00d2ff; font-size: 0.8rem; white-space: nowrap;">${fb.time}</td>
+            <td style="padding: 1rem; text-align: center; white-space: nowrap;">
+              <button onclick="deleteFeedback(${fb.originalIndex})" class="delete-action-btn">
+                <i class="fa-solid fa-trash"></i> Sil
+              </button>
+            </td>
           </tr>
         `;
       });
@@ -112,7 +279,7 @@ app.get('/admin', (req, res) => {
                               radial-gradient(circle at 90% 80%, rgba(255, 56, 96, 0.05) 0%, transparent 40%);
           }
           .admin-card {
-            max-width: 1000px;
+            max-width: 1050px;
             margin: 0 auto;
             background: rgba(16, 22, 37, 0.65);
             border: 1px solid rgba(0, 210, 255, 0.2);
@@ -171,6 +338,23 @@ app.get('/admin', (req, res) => {
           tr:hover {
             background: rgba(255, 255, 255, 0.02);
           }
+          .delete-action-btn {
+            background: rgba(255, 56, 96, 0.12);
+            border: 1px solid rgba(255, 56, 96, 0.35);
+            color: #ff3860;
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+          .delete-action-btn:hover {
+            background: #ff3860;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(255, 56, 96, 0.4);
+            transform: scale(1.02);
+          }
         </style>
       </head>
       <body>
@@ -182,9 +366,10 @@ app.get('/admin', (req, res) => {
           <table>
             <thead>
               <tr>
-                <th style="width: 25%;">Gönderen</th>
-                <th style="width: 55%;">Geri Bildirim Mesajı</th>
+                <th style="width: 20%;">Gönderen</th>
+                <th style="width: 50%;">Geri Bildirim Mesajı</th>
                 <th style="width: 20%;">Tarih</th>
+                <th style="width: 10%; text-align: center;">Eylemler</th>
               </tr>
             </thead>
             <tbody>
@@ -192,6 +377,30 @@ app.get('/admin', (req, res) => {
             </tbody>
           </table>
         </div>
+
+        <script>
+          function deleteFeedback(originalIndex) {
+            if (confirm("Bu geri bildirimi silmek istediğinize emin misiniz?")) {
+              fetch('/admin/delete-feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: originalIndex })
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  window.location.reload();
+                } else {
+                  alert("Hata: " + (data.error || "Silme işlemi başarısız."));
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                alert("Bağlantı hatası oluştu.");
+              });
+            }
+          }
+        </script>
       </body>
       </html>
     `;
