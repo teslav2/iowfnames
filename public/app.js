@@ -1498,7 +1498,13 @@ function renderGame(gameState, playersList, roomSettings) {
           : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
 
         const matchWord = entry.text.match(/"([^"]+)"/);
-        const clueText = matchWord ? matchWord[1] : '';
+        let clueText = matchWord ? matchWord[1] : '';
+        
+        // Wrap count in parenthesis if formatted as "WORD COUNT"
+        const parts = clueText.split(' ');
+        if (parts.length === 2 && !parts[1].startsWith('(')) {
+          clueText = `${parts[0]} (${parts[1]})`;
+        }
         
         customClass = isRed ? 'red-clue' : 'blue-clue';
         formattedHTML = `<span class="log-icon">💡</span> <strong style="text-transform: uppercase;">${teamName}</strong> İpucu: <span class="clue-highlight">${clueText}</span>`;
