@@ -1352,10 +1352,13 @@ function renderGame(gameState, playersList, roomSettings) {
         cardEl.dataset.state = cardStateString;
 
         // Build card-back HTML (character side)
+        const showCover = card.characterImage && card.characterImage.trim() !== "";
         const cardBackHTML = `
+              ${showCover ? `
               <div class="card-character-cover" style="background-image: url('${card.characterImage}');">
                 <span class="character-name-badge">${escapeHTML(card.characterName || '')}</span>
               </div>
+              ` : ''}
               <span class="card-word">${escapeHTML(card.word)}</span>`;
 
         // Build card-front HTML (closed side)

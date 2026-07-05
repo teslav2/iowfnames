@@ -518,30 +518,24 @@ function scanCharacters() {
     // Sort files alphabetically to keep order consistent
     files.sort();
     
-    files.forEach(file => {
-      // Matches character[NAME]_[INDEX].(png|jpg|jpeg)
-      const match = file.match(/^character([A-Za-z0-9İıŞşĞğÇçÖöÜü\-_]*?)_(\d+)\.(png|jpg|jpeg)$/i);
-      if (match) {
-        let extractedName = match[1].replace(/^[\-_]/, '').trim(); // Remove leading dash/underscore
+    files.forEach((file, index) => {
+      const ext = path.extname(file).toLowerCase();
+      if (ext === '.png' || ext === '.jpg' || ext === '.jpeg') {
+        const baseName = path.basename(file, ext);
+        let extractedName = baseName.toUpperCase();
         
-        // Fallback names if name is empty (e.g. character_1.png)
-        if (!extractedName) {
-          const idx = parseInt(match[2]);
-          const fallbacks = [
-            "KOVBOY", "NESWİN", "ALİ", "MAMİ", "NURİBEY", 
-            "KASIM", "DOBBY", "BLUSH", "ŞİNASİ", "TRIEL", 
-            "BUSE", "ÇAĞRI", "FUFUSUU", "HASAN", "ASLAN"
-          ];
-          extractedName = fallbacks[(idx - 1) % fallbacks.length] || `KARAKTER ${idx}`;
-        } else {
-          // Clean up name: convert to uppercase Turkish-friendly
-          extractedName = extractedName.toUpperCase();
+        // Remove "character" prefix if it exists by any chance
+        if (extractedName.startsWith("CHARACTER")) {
+          extractedName = extractedName.substring("CHARACTER".length).replace(/^[\-_]/, '').trim();
         }
+
+        // Remove trailing numbers or indices if they exist (e.g. NAME_1 -> NAME)
+        extractedName = extractedName.replace(/_\d+$/, '').trim();
         
         chars.push({
           image: `/logos/characters/${file}`,
-          name: extractedName,
-          index: parseInt(match[2])
+          name: extractedName || `KARAKTER ${index + 1}`,
+          index: index + 1
         });
       }
     });
@@ -575,8 +569,8 @@ function generateBoard() {
   return {
     startingTeam,
     cards: selectedWords.map((word, index) => {
-      let charImage = `/logos/characters/character_1.png`;
-      let charName = "KASIM";
+      let charImage = "";
+      let charName = "";
       
       if (availableChars.length > 0) {
         // Pick character based on index modulo size

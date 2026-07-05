@@ -1996,13 +1996,15 @@ body {
   transform: none !important; /* Never rotated, never mirrored */
 }
 
-/* KAPALI KART: Grid görselinin sağ üst köşesi (bej sivil kart) */
+/* KAPALI KART: Ekip kartı dokusu (Sadece Ekip üyelerinde kapalıyken gözükür) */
 .card-front {
-  background-image: url('logos/kartlogosu.png');
-  background-size: 235% 235%;
-  background-position: 91% 9%; /* Top-Right: Beige Card texture cropped */
-  background-repeat: no-repeat;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-image: url('logos/ekipkartlari.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .card-item:not(.revealed):hover .card-front {
@@ -2011,42 +2013,42 @@ body {
   border-color: rgba(0, 210, 255, 0.3);
 }
 
-/* CASUSBAŞI (ANLATICI) GÖRÜNÜMÜ: Kapalı kartların gerçek renkli garaj görünümleri */
+/* CASUSBAŞI (ANLATICI) GÖRÜNÜMÜ: Kapalı kartların gerçek renkli görselleri (Lider Kartları Doku Sayfası) */
 .card-item.is-spymaster.color-red .card-front {
-  background-image: url('logos/spymaster_cards.png') !important;
+  background-image: url('logos/liderkartlari.png') !important;
   background-size: 235% 235% !important;
-  background-position: 9% 91% !important; /* Bottom-Left: Red Garage card cropped */
+  background-position: 9% 91% !important; /* Bottom-Left: Red Card cropped */
   border: 2px solid rgba(255, 56, 96, 0.6) !important;
-  box-shadow: 0 0 10px rgba(255, 56, 96, 0.35) !important;
+  box-shadow: 0 0 12px rgba(255, 56, 96, 0.4) !important;
 }
 
 .card-item.is-spymaster.color-blue .card-front {
-  background-image: url('logos/spymaster_cards.png') !important;
+  background-image: url('logos/liderkartlari.png') !important;
   background-size: 235% 235% !important;
-  background-position: 91% 91% !important; /* Bottom-Right: Blue Garage card cropped */
+  background-position: 91% 91% !important; /* Bottom-Right: Blue Card cropped */
   border: 2px solid rgba(0, 210, 255, 0.6) !important;
-  box-shadow: 0 0 10px rgba(0, 210, 255, 0.35) !important;
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.4) !important;
 }
 
 .card-item.is-spymaster.color-neutral .card-front {
-  background-image: url('logos/spymaster_cards.png') !important;
+  background-image: url('logos/liderkartlari.png') !important;
   background-size: 235% 235% !important;
-  background-position: 91% 9% !important; /* Top-Right: Beige Garage card cropped */
+  background-position: 91% 9% !important; /* Top-Right: Beige Card cropped */
   border: 2px solid rgba(186, 168, 149, 0.6) !important;
-  box-shadow: 0 0 6px rgba(186, 168, 149, 0.2) !important;
+  box-shadow: 0 0 8px rgba(186, 168, 149, 0.25) !important;
 }
 
 .card-item.is-spymaster.color-assassin .card-front {
-  background-image: url('logos/spymaster_cards.png') !important;
+  background-image: url('logos/liderkartlari.png') !important;
   background-size: 235% 235% !important;
-  background-position: 9% 9% !important; /* Top-Left: Black Garage card cropped */
-  border: 2px solid rgba(255, 56, 96, 0.8) !important;
-  box-shadow: 0 0 14px rgba(255, 56, 96, 0.45) !important;
+  background-position: 9% 9% !important; /* Top-Left: Black Card cropped */
+  border: 2px solid rgba(255, 56, 96, 0.85) !important;
+  box-shadow: 0 0 16px rgba(255, 56, 96, 0.5) !important;
 }
 
-/* AÇILAN KART YÜZÜ (Geriye Dönük Base Layer - Garaj Kartı) */
+/* AÇILAN KART YÜZÜ (Geriye Dönük Base Layer - Otopark Kart Dokuları) */
 .card-back {
-  background-image: url('logos/spymaster_cards.png') !important;
+  background-image: url('logos/otopark.png') !important;
   background-size: 235% 235% !important;
   background-repeat: no-repeat !important;
   display: flex;
@@ -2065,10 +2067,11 @@ body {
   width: 100%;
   height: 100%;
   z-index: 2;
-  background-size: 235% 235% !important;
+  background-size: contain !important; /* Contain to keep character fully visible without side crops */
+  background-position: bottom center !important; /* Align character feet to the bottom of the active frame */
   background-repeat: no-repeat !important;
   transform-origin: top;
-  transition: height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.45s ease, box-shadow 0.4s ease;
+  transition: height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.3s ease, box-shadow 0.4s ease;
   pointer-events: none; /* Tıklamaların karta geçmesi için */
   border-radius: 8px;
 }
@@ -2078,6 +2081,23 @@ body {
   height: 70% !important;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+}
+
+/* Team Color Silhouette Glow & Duotone Tint Effects for character PNGs */
+.card-item.color-red .card-character-cover {
+  filter: sepia(1) saturate(3.5) hue-rotate(-52deg) brightness(0.8) contrast(1.25) drop-shadow(0 0 6px rgba(255, 56, 96, 0.8)) drop-shadow(0 0 12px rgba(255, 56, 96, 0.4));
+}
+
+.card-item.color-blue .card-character-cover {
+  filter: sepia(1) saturate(3.8) hue-rotate(172deg) brightness(0.8) contrast(1.25) drop-shadow(0 0 6px rgba(0, 210, 255, 0.8)) drop-shadow(0 0 12px rgba(0, 210, 255, 0.4));
+}
+
+.card-item.color-neutral .card-character-cover {
+  filter: sepia(0.8) saturate(1.1) hue-rotate(-12deg) brightness(0.88) contrast(1.1) drop-shadow(0 0 5px rgba(186, 168, 149, 0.75)) drop-shadow(0 0 10px rgba(186, 168, 149, 0.35));
+}
+
+.card-item.color-assassin .card-character-cover {
+  filter: grayscale(1) brightness(0.72) contrast(1.3) drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
 }
 
 /* Karakter İsim Rozeti (Sağ Üst - Kapağa bağlı) */
@@ -2114,7 +2134,7 @@ body {
   }
 }
 
-/* Takım Renklerine Göre Arka Planlar (Garaj Base Kartları) */
+/* Takım Renklerine Göre Arka Planlar (Otopark Dokusu Kırpması) */
 .card-item.color-red .card-back {
   background-position: 9% 91% !important; /* Bottom-Left: Red Garage card cropped */
 }
@@ -2131,21 +2151,13 @@ body {
   background-position: 9% 9% !important; /* Top-Left: Black Garage card cropped */
 }
 
-/* Takım Renklerine Göre Karakter Kapak Katmanı Hizalaması (2x2 karakter grid) */
-.card-item.color-red .card-character-cover {
-  background-position: 9% 91% !important; /* Bottom-Left: Red Character sheet cropped */
-}
-
-.card-item.color-blue .card-character-cover {
-  background-position: 91% 91% !important; /* Bottom-Right: Blue Character sheet cropped */
-}
-
-.card-item.color-neutral .card-character-cover {
-  background-position: 91% 9% !important; /* Top-Right: Beige Character sheet cropped */
-}
-
+/* Takım Renklerine Göre Karakter Kapak Katmanı Hizalaması (Karakter yüklendiğinde tam ekran kaplama) */
+.card-item.color-red .card-character-cover,
+.card-item.color-blue .card-character-cover,
+.card-item.color-neutral .card-character-cover,
 .card-item.color-assassin .card-character-cover {
-  background-position: 9% 9% !important; /* Top-Left: Black Character sheet cropped */
+  background-size: cover !important;
+  background-position: center !important;
 }
 
 /* Stage 2 - Kapağın Yukarı Doğru Menteşeli Olarak Kalkması - KALDIRILDI (Sabit Kart Tasarımı) */
