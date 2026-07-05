@@ -1540,7 +1540,7 @@ function renderGame(gameState, playersList, roomSettings) {
     const isAdmin = socket.id === roomAdminId;
     safeSetDisplay(btnGameoverRestart, isAdmin ? 'block' : 'none');
     safeSetDisplay(btnGameoverLobby, isAdmin ? 'block' : 'none');
-    safeSetDisplay(btnGameoverClose, isAdmin ? 'block' : 'none');
+    safeSetDisplay(btnGameoverClose, 'block');
 
     if (gameoverModal && !gameoverModal.classList.contains('active') && !winnerModalDismissed) {
       playLocalSound('victory');
