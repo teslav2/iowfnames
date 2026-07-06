@@ -10,10 +10,10 @@
   --text-muted: #9ca3af;
   
   /* Team Colors & Glows */
-  --color-blue: #00D2FF;
-  --color-blue-rgb: 0, 210, 255;
-  --color-red: #ff3860;
-  --color-red-rgb: 255, 56, 96;
+  --color-blue: #013368;
+  --color-blue-rgb: 1, 51, 104;
+  --color-red: #A10305;
+  --color-red-rgb: 161, 3, 5;
   --color-yellow: #f59e0b;
   
   /* Card Themes */
@@ -441,7 +441,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  height: 700px; /* Set fixed height to expand downwards and stabilize chat */
+  height: 790px; /* Set taller fixed height to expand downwards and give Gözcüler breathing room */
   max-width: 1200px;
   margin: 0 auto;
   padding: 0.5rem;
@@ -482,7 +482,7 @@ body {
 }
 
 .lobby-middle-col .lobby-room-panel {
-  height: 280px !important;
+  height: 330px !important;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -492,7 +492,7 @@ body {
 
 .lobby-spectators-card {
   padding: 0.75rem !important;
-  height: 130px !important;
+  height: 170px !important;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -3480,9 +3480,9 @@ body {
 .admin-player-item.glow-red,
 .agent-tag.glow-red,
 .spymaster-badge.glow-red {
-  box-shadow: 0 0 15px rgba(255, 56, 96, 0.5) !important;
-  border-color: rgba(255, 56, 96, 0.75) !important;
-  background: rgba(255, 56, 96, 0.08) !important;
+  box-shadow: 0 0 15px rgba(161, 3, 5, 0.5) !important;
+  border-color: rgba(161, 3, 5, 0.75) !important;
+  background: rgba(161, 3, 5, 0.08) !important;
 }
 
 .player-item.glow-blue,
@@ -3490,9 +3490,9 @@ body {
 .admin-player-item.glow-blue,
 .agent-tag.glow-blue,
 .spymaster-badge.glow-blue {
-  box-shadow: 0 0 15px rgba(0, 210, 255, 0.5) !important;
-  border-color: rgba(0, 210, 255, 0.75) !important;
-  background: rgba(0, 210, 255, 0.08) !important;
+  box-shadow: 0 0 15px rgba(1, 51, 104, 0.5) !important;
+  border-color: rgba(1, 51, 104, 0.75) !important;
+  background: rgba(1, 51, 104, 0.08) !important;
 }
 
 .player-item.glow-gray,

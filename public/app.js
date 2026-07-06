@@ -2054,8 +2054,20 @@ if (feedbackForm) {
   });
 }
 
-// Background preloading of all character images dynamically from server to ensure instant rendering in-game
+// Background preloading of all character images and card textures dynamically to ensure instant rendering in-game
 function preloadCharacterImages() {
+  // Preload static card assets immediately
+  const cardAssets = [
+    'logos/ekipkartlari.png',
+    'logos/liderkartlari.png',
+    'logos/otopark.png'
+  ];
+  cardAssets.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+  console.log(`[PRELOADER] 3 adet oyun kartı dokusu önbelleğe alındı.`);
+
   fetch('/api/characters')
     .then(res => res.json())
     .then(chars => {
