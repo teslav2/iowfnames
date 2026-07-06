@@ -527,11 +527,10 @@ function switchScreen(targetScreen) {
 if (createRoomBtn) {
   createRoomBtn.addEventListener('click', () => {
     const name = usernameInput ? usernameInput.value.trim() : '';
-    const password = lobbyPasswordInput ? lobbyPasswordInput.value.trim() : '';
     if (!name) return alert("Lütfen bir isim girin.");
 
     if (socket) {
-      socket.emit('createRoom', { name, playerId: localPlayerId, password });
+      socket.emit('createRoom', { name, playerId: localPlayerId, password: '' });
     }
   });
 }
@@ -540,12 +539,11 @@ if (joinRoomBtn) {
   joinRoomBtn.addEventListener('click', () => {
     const name = usernameInput ? usernameInput.value.trim() : '';
     const code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : '';
-    const password = lobbyPasswordInput ? lobbyPasswordInput.value.trim() : '';
     if (!name) return alert("Lütfen bir isim girin.");
     if (!code) return alert("Lütfen oda kodunu girin.");
 
     if (socket) {
-      socket.emit('joinRoom', { roomCode: code, name, playerId: localPlayerId, password });
+      socket.emit('joinRoom', { roomCode: code, name, playerId: localPlayerId, password: '' });
     }
   });
 }
