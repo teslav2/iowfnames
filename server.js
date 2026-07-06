@@ -436,7 +436,8 @@ app.get('/api/lobbies', (req, res) => {
           hostName: host ? host.name : 'Bilinmeyen',
           playerCount: humanPlayers.length,
           maxPlayers: room.settings.maxPlayers,
-          teamNames: room.teamNames || { red: 'KIRMIZI TAKIM', blue: 'MAVİ TAKIM' }
+          teamNames: room.teamNames || { red: 'KIRMIZI TAKIM', blue: 'MAVİ TAKIM' },
+          hasPassword: !!(room.password && room.password !== "")
         });
       }
     }
@@ -900,6 +901,7 @@ function getRoomClientData(roomCode) {
     gameState: room.gameState,
     settings: room.settings,
     isPublic: room.isPublic || false,
+    password: room.password || "",
     teamNames: room.teamNames || { red: "KIRMIZI TAKIM", blue: "MAVİ TAKIM" }
   };
 }
@@ -986,11 +988,12 @@ io.on('connection', (socket) => {
   }
 
   // 1. Create Room
-  socket.on('createRoom', ({ name, playerId }) => {
+  socket.on('createRoom', ({ name, playerId, password }) => {
     try {
       const nameClean = name ? name.trim() : 'Bilinmeyen Oyuncu';
       const pidClean = playerId || `pid-${Math.random().toString(36).substr(2, 9)}`;
       const roomCode = generateRoomCode();
+      const roomPasswordClean = password ? password.trim() : '';
       
       rooms[roomCode] = {
         roomCode,
@@ -1001,6 +1004,7 @@ io.on('connection', (socket) => {
         gameState: null,
         bannedNames: [],
         isPublic: false,
+        password: roomPasswordClean,
         teamNames: { red: "KIRMIZI TAKIM", blue: "MAVİ TAKIM" },
         settings: {
           turnDuration: 90, // default 90 seconds
@@ -1043,7 +1047,7 @@ io.on('connection', (socket) => {
   });
 
   // 2. Join Room (Handles Reconnection and duplicate player prevention)
-  socket.on('joinRoom', ({ roomCode, name, playerId }) => {
+  socket.on('joinRoom', ({ roomCode, name, playerId, password }) => {
     try {
       const code = roomCode ? roomCode.toUpperCase().trim() : '';
       const nameClean = name ? name.trim() : 'Bilinmeyen Oyuncu';
@@ -1060,8 +1064,19 @@ io.on('connection', (socket) => {
         return socket.emit('errorMsg', 'Bu odadan yasaklandınız! Giriş yapamazsınız.');
       }
 
-      // Check Max Players Limit (only if not a reconnecting player)
+      // Check Password if room is password-protected (reconnection bypasses password check)
       const isReconnecting = room.players.find(p => p.playerId === pidClean);
+      if (!isReconnecting && room.password && room.password !== "") {
+        if (password === undefined || password === null) {
+          // Send special event requesting password prompt
+          return socket.emit('lobbyPasswordRequired', { roomCode: code, name: nameClean });
+        }
+        if (password.trim() !== room.password) {
+          return socket.emit('errorMsg', 'Girdiğiniz oda şifresi yanlış!');
+        }
+      }
+
+      // Check Max Players Limit (only if not a reconnecting player)
       if (!isReconnecting && room.settings.maxPlayers !== 'unlimited') {
         const activePlayersCount = room.players.filter(p => !p.isBot).length;
         if (activePlayersCount >= parseInt(room.settings.maxPlayers)) {

@@ -43,6 +43,7 @@ let myPlayerInfo = {
   isBot: false
 };
 let activeRoomCode = "";
+let activeRoomPassword = "";
 let roomAdminId = "";
 
 // Timer local tracking
@@ -66,6 +67,7 @@ const screenGame = document.getElementById('screen-game');
 
 // Landing Elements
 const usernameInput = document.getElementById('username-input');
+const lobbyPasswordInput = document.getElementById('lobby-password-input');
 const roomCodeInput = document.getElementById('room-code-input');
 const createRoomBtn = document.getElementById('create-room-btn');
 const joinRoomBtn = document.getElementById('join-room-btn');
@@ -304,12 +306,23 @@ if (typeof io !== 'undefined') {
     switchScreen(screenLobby);
   });
 
+  socket.on('lobbyPasswordRequired', ({ roomCode, name }) => {
+    const pw = prompt("Bu oda şifrelidir. Lütfen oda şifresini girin:");
+    if (pw !== null) {
+      socket.emit('joinRoom', { roomCode, name, playerId: localPlayerId, password: pw });
+    }
+  });
+
   socket.on('roomState', (roomData) => {
     if (!roomData) return;
 
     roomAdminId = roomData.hostId;
+    activeRoomPassword = roomData.password || "";
     const me = roomData.players.find(p => p.playerId === localPlayerId);
     if (me) myPlayerInfo = me;
+
+    // Sync room code and password display
+    syncRoomCodeDisplay();
 
     // Sync lobby team names
     if (roomData.teamNames) {
@@ -361,16 +374,7 @@ if (typeof io !== 'undefined') {
       }
     }
 
-    // Sync Glow Picker active state for current player
-    if (myPlayerInfo && myPlayerInfo.glow) {
-      document.querySelectorAll('.glow-opt-btn').forEach(btn => {
-        if (btn.dataset.glow === myPlayerInfo.glow) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-    }
+
 
     // Sync Ready Button for regular team players
     if (toggleReadyBtn) {
@@ -451,10 +455,11 @@ function switchScreen(targetScreen) {
 if (createRoomBtn) {
   createRoomBtn.addEventListener('click', () => {
     const name = usernameInput ? usernameInput.value.trim() : '';
+    const password = lobbyPasswordInput ? lobbyPasswordInput.value.trim() : '';
     if (!name) return alert("Lütfen bir isim girin.");
 
     if (socket) {
-      socket.emit('createRoom', { name, playerId: localPlayerId });
+      socket.emit('createRoom', { name, playerId: localPlayerId, password });
     }
   });
 }
@@ -463,11 +468,12 @@ if (joinRoomBtn) {
   joinRoomBtn.addEventListener('click', () => {
     const name = usernameInput ? usernameInput.value.trim() : '';
     const code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : '';
+    const password = lobbyPasswordInput ? lobbyPasswordInput.value.trim() : '';
     if (!name) return alert("Lütfen bir isim girin.");
-    if (!code || code.length !== 3) return alert("Lütfen 3 haneli lobi kodunu girin.");
+    if (!code) return alert("Lütfen oda kodunu girin.");
 
     if (socket) {
-      socket.emit('joinRoom', { roomCode: code, name, playerId: localPlayerId });
+      socket.emit('joinRoom', { roomCode: code, name, playerId: localPlayerId, password });
     }
   });
 }
@@ -496,9 +502,13 @@ function fetchAndRenderLobbies() {
         const maxText = lobby.maxPlayers === 'unlimited' ? '∞' : lobby.maxPlayers;
         const item = document.createElement('div');
         item.className = 'lobby-list-item';
+        
+        // Render 🔒 for password-protected rooms, 🌍 for open public rooms
+        const statusBadge = lobby.hasPassword ? '<span style="margin-right: 0.4rem; font-size: 0.82rem;" title="Şifreli Oda">🔒</span>' : '<span style="margin-right: 0.4rem; font-size: 0.82rem;" title="Şifresiz Oda">🌍</span>';
+        
         item.innerHTML = `
           <div class="lobby-list-info">
-            <div class="lobby-list-host"><i class="fa-solid fa-crown" style="color: #ffd700; font-size: 0.75rem;"></i> ${lobby.hostName}</div>
+            <div class="lobby-list-host">${statusBadge}<i class="fa-solid fa-crown" style="color: #ffd700; font-size: 0.75rem;"></i> ${lobby.hostName}</div>
             <div class="lobby-list-meta">
               <span><i class="fa-solid fa-users"></i> ${lobby.playerCount}/${maxText}</span>
               <span><i class="fa-solid fa-key"></i> ***</span>
@@ -648,15 +658,7 @@ if (shuffleTeamsBtn) {
   });
 }
 
-// Glow Color options selection listener
-document.querySelectorAll('.glow-opt-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    const selectedGlow = e.currentTarget.dataset.glow;
-    if (socket) {
-      socket.emit('updateGlow', { glow: selectedGlow });
-    }
-  });
-});
+
 
 // Edit team name buttons in lobby
 const btnEditRedTeam = document.getElementById('btn-edit-red-team');
@@ -855,7 +857,8 @@ function renderLobbyPlayersAdminList(players) {
 
   players.forEach(p => {
     const row = document.createElement('div');
-    row.className = `lobby-user-row ${p.playerId === localPlayerId ? 'me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
+    const autoGlowClass = p.team === 'red' ? 'glow-red' : (p.team === 'blue' ? 'glow-blue' : 'glow-gray');
+    row.className = `lobby-user-row ${p.playerId === localPlayerId ? 'me' : ''} ${autoGlowClass}`;
     row.setAttribute('data-player-row-id', p.id);
 
     let teamName = p.team === 'red' ? 'Kırmızı' : p.team === 'blue' ? 'Mavi' : 'Gözcü';
@@ -1030,8 +1033,8 @@ function renderLobbyPlayers(players) {
   spectatorList.innerHTML = '';
 
   players.forEach(p => {
-    const div = document.createElement('div');
-    div.className = `player-item team-${p.team} ${p.playerId === localPlayerId ? 'me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
+    const autoGlowClass = p.team === 'red' ? 'glow-red' : (p.team === 'blue' ? 'glow-blue' : 'glow-gray');
+    div.className = `player-item team-${p.team} ${p.playerId === localPlayerId ? 'me' : ''} ${autoGlowClass}`;
     div.setAttribute('data-player-row-id', p.id);
 
     let nameClass = '';
@@ -1217,7 +1220,7 @@ function renderGame(gameState, playersList, roomSettings) {
     const redSpy = playersList.find(p => p.team === 'red' && p.role === 'spymaster');
     if (redSpy) {
       const redSpyEmojiHTML = redSpy.emoji ? `<span class="emoji-reaction-bubble">${redSpy.emoji}</span>` : '';
-      gameRedSpymaster.innerHTML = `<span class="spymaster-badge ${redSpy.glow ? 'glow-' + redSpy.glow : ''}" data-player-row-id="${redSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(redSpy.name)}</span> <span class="player-emoji-slot">${redSpyEmojiHTML}</span></span>`;
+      gameRedSpymaster.innerHTML = `<span class="spymaster-badge glow-red" data-player-row-id="${redSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(redSpy.name)}</span> <span class="player-emoji-slot">${redSpyEmojiHTML}</span></span>`;
     } else {
       gameRedSpymaster.innerHTML = `<span class="spymaster-badge text-muted">👑 Lider Yok</span>`;
     }
@@ -1225,14 +1228,14 @@ function renderGame(gameState, playersList, roomSettings) {
     const blueSpy = playersList.find(p => p.team === 'blue' && p.role === 'spymaster');
     if (blueSpy) {
       const blueSpyEmojiHTML = blueSpy.emoji ? `<span class="emoji-reaction-bubble">${blueSpy.emoji}</span>` : '';
-      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge ${blueSpy.glow ? 'glow-' + blueSpy.glow : ''}" data-player-row-id="${blueSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(blueSpy.name)}</span> <span class="player-emoji-slot">${blueSpyEmojiHTML}</span></span>`;
+      gameBlueSpymaster.innerHTML = `<span class="spymaster-badge glow-blue" data-player-row-id="${blueSpy.id}">👑 <span class="leader-name-gold">${escapeHTML(blueSpy.name)}</span> <span class="player-emoji-slot">${blueSpyEmojiHTML}</span></span>`;
     } else {
       gameBlueSpymaster.innerHTML = `<span class="spymaster-badge text-muted">👑 Lider Yok</span>`;
     }
 
     playersList.filter(p => p.team === 'red' && p.role === 'agent').forEach(p => {
       const span = document.createElement('span');
-      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
+      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''} glow-red`;
       span.setAttribute('data-player-row-id', p.id);
       const emojiHTML = p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : '';
       span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
@@ -1241,7 +1244,7 @@ function renderGame(gameState, playersList, roomSettings) {
 
     playersList.filter(p => p.team === 'blue' && p.role === 'agent').forEach(p => {
       const span = document.createElement('span');
-      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''} ${p.glow ? 'glow-' + p.glow : ''}`;
+      span.className = `agent-tag ${p.playerId === localPlayerId ? 'is-me' : ''} glow-blue`;
       span.setAttribute('data-player-row-id', p.id);
       const emojiHTML = p.emoji ? `<span class="emoji-reaction-bubble">${p.emoji}</span>` : '';
       span.innerHTML = `👤 ${escapeHTML(p.name)} <span class="player-emoji-slot">${emojiHTML}</span>`;
@@ -1686,6 +1689,9 @@ function syncRoomCodeDisplay() {
   const gameRoomCodeValEl = document.getElementById('game-room-code-val');
   const btnToggleLobbyCode = document.getElementById('btn-toggle-lobby-code');
   const btnToggleRoomCode = document.getElementById('btn-toggle-room-code');
+  
+  const displayLobbyPwContainer = document.getElementById('display-lobby-password-container');
+  const displayLobbyPwVal = document.getElementById('display-lobby-password');
 
   const visibleText = activeRoomCode || '------';
   const hiddenText = '******'; // Star mask as requested by user
@@ -1695,11 +1701,22 @@ function syncRoomCodeDisplay() {
     if (gameRoomCodeValEl) gameRoomCodeValEl.textContent = hiddenText;
     if (btnToggleLobbyCode) btnToggleLobbyCode.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
     if (btnToggleRoomCode) btnToggleRoomCode.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+    
+    // Hide password details
+    if (displayLobbyPwVal) displayLobbyPwVal.textContent = '***';
   } else {
     if (displayRoomCodeEl) displayRoomCodeEl.textContent = visibleText;
     if (gameRoomCodeValEl) gameRoomCodeValEl.textContent = visibleText;
     if (btnToggleLobbyCode) btnToggleLobbyCode.innerHTML = '<i class="fa-solid fa-eye"></i>';
     if (btnToggleRoomCode) btnToggleRoomCode.innerHTML = '<i class="fa-solid fa-eye"></i>';
+
+    // Show password details
+    if (displayLobbyPwVal) displayLobbyPwVal.textContent = activeRoomPassword || '---';
+  }
+
+  // Show/Hide password container based on whether a password exists
+  if (displayLobbyPwContainer) {
+    displayLobbyPwContainer.style.display = (activeRoomPassword && activeRoomPassword !== "") ? 'inline-flex' : 'none';
   }
 }
 
