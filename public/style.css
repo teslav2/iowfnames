@@ -26,9 +26,31 @@
   /* Fonts */
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Outfit', sans-serif;
+
+  /* Responsive Scale System */
+  --base-font-size: clamp(13px, 0.42vw + 8px, 24px);
+  --panel-width: clamp(280px, 15vw, 420px);
+  --board-max-width: clamp(950px, 60vw, 1800px);
+  --card-gap: clamp(0.35rem, 0.5vw, 0.75rem);
+  --panel-gap: clamp(0.5rem, 0.7vw, 1rem);
+}
+
+@media (min-width: 2560px) {
+  :root {
+    --base-font-size: clamp(18px, 0.35vw + 12px, 28px);
+    --panel-width: clamp(360px, 16vw, 480px);
+    --board-max-width: clamp(1200px, 58vw, 2200px);
+    --card-gap: clamp(0.5rem, 0.6vw, 1rem);
+    --panel-gap: clamp(0.75rem, 0.8vw, 1.25rem);
+  }
 }
 
 /* --- BASE STYLES --- */
+html {
+  font-size: var(--base-font-size);
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -125,12 +147,12 @@ body {
   overflow: visible;
 }
 
-/* --- HEADER (Compact, 50px height) --- */
+/* --- HEADER (Compact, 3.125rem height) --- */
 .game-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 50px;
+  height: 3.125rem;
   border-bottom: 1px solid var(--panel-border);
   padding: 0 0.5rem;
 }
@@ -142,7 +164,7 @@ body {
 }
 
 .brand-logo-img {
-  height: 34px;
+  height: 2.125rem;
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 0 6px rgba(0, 210, 255, 0.35));
@@ -874,7 +896,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 55px;
+  height: 3.4375rem;
   border-bottom: 1px solid var(--panel-border);
   padding: 0 0.5rem;
   background: rgba(8, 11, 17, 0.4);
@@ -1032,8 +1054,8 @@ body {
 /* 3-Column main area */
 .game-3col {
   display: grid;
-  grid-template-columns: 280px 1fr 280px;
-  gap: 0.75rem;
+  grid-template-columns: var(--panel-width) 1fr var(--panel-width);
+  gap: var(--panel-gap);
   height: calc(100vh - 135px); /* Stretch to fill viewport and make cards/panels taller */
   min-height: 600px;
   padding: 0.5rem 0;
@@ -1307,8 +1329,8 @@ body {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  gap: 0.5rem;
-  max-width: 950px;
+  gap: var(--card-gap);
+  max-width: var(--board-max-width);
   width: 100%;
   margin: 0 auto;
 }
@@ -1323,7 +1345,7 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 52px;
-  max-width: 950px;
+  max-width: var(--board-max-width);
   width: 100%;
   margin: 0 auto;
 }
