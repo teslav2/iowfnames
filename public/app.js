@@ -1743,6 +1743,9 @@ function escapeHTML(str) {
 
 // Auto join link parameter
 window.addEventListener('DOMContentLoaded', () => {
+  // Preload all high-res character images in the background for zero-lag rendering
+  preloadCharacterImages();
+
   const urlParams = new URLSearchParams(window.location.search);
   let roomCodeQuery = urlParams.get('room');
 
@@ -2004,6 +2007,20 @@ if (feedbackForm) {
         console.error('Feedback submit error:', err);
         alert("Geri bildirim gönderilirken bağlantı hatası oluştu.");
       });
+  });
+}
+
+// Background preloading of all character images to ensure instant rendering in-game
+function preloadCharacterImages() {
+  const characters = [
+    "ARCHİE.png", "BERKOOK.png", "BERU.png", "CEMRENUR18.png", "DUBALOBA.png",
+    "GAVATNUR.png", "HASANSÖR.png", "IOWF.png", "MELİBON.png", "MORSEX.png",
+    "MURO.png", "SAMO.png", "TESLAV2.png"
+  ];
+  
+  characters.forEach(char => {
+    const img = new Image();
+    img.src = `logos/characters/${char}`;
   });
 }
 
