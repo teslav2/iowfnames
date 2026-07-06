@@ -50,9 +50,10 @@
   <div class="app-container">
     <!-- 50px Header -->
     <header class="game-header">
-      <div class="brand">
+      <div class="brand" id="brand-home-btn" style="cursor: pointer;" title="Ana Sayfaya Dön">
         <img src="/logos/logo.png" alt="IOWFNAMES Logo" class="brand-logo-img">
         <h1 class="brand-text">IOWFNAMES</h1>
+        <span class="header-copyright">© 2026 Teslav2 Tüm Hakları Saklıdır.</span>
       </div>
       <div class="top-nav-controls">
         <!-- Scale Selector in Top Panel -->
@@ -68,9 +69,6 @@
             <option value="0.6" style="background: #0b0f19; color: #fff;">%60 (Ekstra Küçük)</option>
           </select>
         </div>
-        <button id="browse-lobbies-btn" class="icon-btn btn-outline-cyan-nav" title="Aktif Lobileri Gör" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
-          <i class="fa-solid fa-globe"></i> Aktif Lobiler
-        </button>
         <button id="fullscreen-btn" class="icon-btn btn-secondary" title="Tam Ekran">
           <i class="fa-solid fa-expand"></i> Tam Ekran
         </button>
@@ -226,7 +224,13 @@
               </button>
               
               <div class="divider"><span>Lobiye Katıl</span></div>
-  
+              
+              <!-- 1. Top Part: Aktif Lobiler Button -->
+              <button id="browse-lobbies-btn" class="btn btn-secondary w-100 btn-glow-cyan" title="Aktif Lobileri Gör" style="margin-bottom: 0.75rem; border-color: var(--color-blue); color: var(--color-blue); background: rgba(0, 210, 255, 0.05);">
+                <i class="fa-solid fa-globe"></i> AKTİF LOBİLER
+              </button>
+              
+              <!-- 2. Bottom Part: Lobi Kodu ve Katıl -->
               <div class="join-box">
                 <div class="input-wrapper">
                   <i class="fa-solid fa-key"></i>
@@ -241,10 +245,6 @@
           </div>
         </div>
 
-        <!-- Copyright bottom notice -->
-        <div class="landing-footer-copyright">
-          © 2026 Teslav2 Tüm Hakları Saklıdır.
-        </div>
       </section>
 
       <!-- 2. LOBBY SCREEN -->

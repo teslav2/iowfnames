@@ -447,11 +447,22 @@ app.get('/api/lobbies', (req, res) => {
   }
 });
 
+// REST API: Get active character names and images list for preloading
+app.get('/api/characters', (req, res) => {
+  try {
+    const chars = scanCharacters();
+    res.json(chars);
+  } catch (e) {
+    console.error("API characters error:", e);
+    res.status(500).json({ error: "Failed to load characters" });
+  }
+});
+
 // Route for short room links: /ROOMCODE
 app.get('/:roomCode', (req, res) => {
   const code = req.params.roomCode.toUpperCase();
-  // If it's a 6-letter alphabetic string, serve the main game page
-  if (/^[A-Z]{6}$/.test(code)) {
+  // If it's a 3-letter alphabetic string, serve the main game page
+  if (/^[A-Z]{3}$/.test(code)) {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   } else {
     res.status(404).send('Not Found');
@@ -1068,9 +1079,6 @@ io.on('connection', (socket) => {
         playerInfo.id = socket.id; // Update socket ID
         playerInfo.connected = true;
         playerInfo.name = nameClean; // Sync name in case it changed
-        if (!playerInfo.isHost) {
-          playerInfo.ready = false; // Reset ready status on reconnect
-        }
         if (playerInfo.isHost) {
           room.hostId = socket.id;
         }
@@ -1750,6 +1758,52 @@ io.on('connection', (socket) => {
     }
   });
 
+  // 21.5. Leave Room Handler (For manual exit without grace period)
+  socket.on('leaveRoom', () => {
+    try {
+      if (currentRoomCode && rooms[currentRoomCode] && currentPlayerId) {
+        const room = rooms[currentRoomCode];
+        cancelPlayerDisconnectTimer(currentPlayerId);
+
+        const idx = room.players.findIndex(p => p.playerId === currentPlayerId);
+        if (idx !== -1) {
+          const player = room.players[idx];
+          const name = player.name;
+          const wasHost = player.isHost;
+
+          room.players.splice(idx, 1);
+          console.log(`Player left room manually: ${name} (${currentPlayerId})`);
+
+          // Migrate host if this player was the host
+          if (wasHost || room.hostId === socket.id) {
+            const nextHost = room.players.find(p => !p.isBot && p.connected);
+            if (nextHost) {
+              room.hostId = nextHost.id;
+              nextHost.isHost = true;
+              addLog(room, `Oda lideri ayrıldığı için liderlik otomatik olarak ${nextHost.name} oyuncusuna devredildi.`);
+            }
+          }
+
+          addLog(room, `${name} odadan ayrıldı.`);
+
+          // Empty Room Cleanup: If no human players remain
+          const activeHumans = room.players.filter(p => !p.isBot && p.connected);
+          if (activeHumans.length === 0) {
+            console.log(`Room ${currentRoomCode} has no human players left. Cleaned up immediately.`);
+            stopServerTimer(currentRoomCode);
+            delete rooms[currentRoomCode];
+          } else {
+            io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
+          }
+        }
+        socket.leave(currentRoomCode);
+      }
+      currentRoomCode = null;
+    } catch (e) {
+      console.error("leaveRoom error:", e);
+    }
+  });
+
   // 22. Disconnect Handler (With 30 seconds reconnect grace period)
   socket.on('disconnect', () => {
     try {
@@ -1757,16 +1811,21 @@ io.on('connection', (socket) => {
         const room = rooms[currentRoomCode];
         const player = room.players.find(p => p.playerId === currentPlayerId);
         
-        if (player) {
+        // Only trigger disconnect offline flow if this is the active socket for the player
+        if (player && player.id === socket.id) {
           player.connected = false;
           console.log(`Player disconnected (grace period started): ${player.name} (${currentPlayerId})`);
+
+          // Broadcast offline state immediately so others see "(Bağlantı Koptu)"
+          io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
 
           // 30 Seconds reconnection grace period
           playerDisconnectTimers[currentPlayerId] = setTimeout(() => {
             const r = rooms[currentRoomCode];
             if (r) {
               const idx = r.players.findIndex(p => p.playerId === currentPlayerId);
-              if (idx !== -1 && !r.players[idx].connected) {
+              // Ensure player is still disconnected and this timer matches their active socket
+              if (idx !== -1 && !r.players[idx].connected && r.players[idx].id === socket.id) {
                 const name = r.players[idx].name;
                 r.players.splice(idx, 1);
                 console.log(`Player removed permanently: ${name} (${currentPlayerId})`);

@@ -501,7 +501,7 @@ function fetchAndRenderLobbies() {
             <div class="lobby-list-host"><i class="fa-solid fa-crown" style="color: #ffd700; font-size: 0.75rem;"></i> ${lobby.hostName}</div>
             <div class="lobby-list-meta">
               <span><i class="fa-solid fa-users"></i> ${lobby.playerCount}/${maxText}</span>
-              <span><i class="fa-solid fa-key"></i> ${lobby.roomCode}</span>
+              <span><i class="fa-solid fa-key"></i> ***</span>
             </div>
           </div>
           <button class="lobby-join-btn" data-code="${lobby.roomCode}">Katıl <i class="fa-solid fa-right-to-bracket"></i></button>
@@ -595,6 +595,7 @@ leaveRoomBtns.forEach(btn => {
     stopTimer();
     clearSavedSession();
     if (socket) {
+      socket.emit('leaveRoom');
       socket.disconnect();
       socket.connect();
     }
@@ -1746,6 +1747,18 @@ window.addEventListener('DOMContentLoaded', () => {
   // Preload all high-res character images in the background for zero-lag rendering
   preloadCharacterImages();
 
+  // Logo home button action
+  const brandHomeBtn = document.getElementById('brand-home-btn');
+  if (brandHomeBtn) {
+    brandHomeBtn.addEventListener('click', () => {
+      if (socket) {
+        socket.emit('leaveRoom');
+      }
+      clearSavedSession();
+      window.location.href = window.location.origin;
+    });
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   let roomCodeQuery = urlParams.get('room');
 
@@ -2010,17 +2023,23 @@ if (feedbackForm) {
   });
 }
 
-// Background preloading of all character images to ensure instant rendering in-game
+// Background preloading of all character images dynamically from server to ensure instant rendering in-game
 function preloadCharacterImages() {
-  const characters = [
-    "ARCHİE.png", "BERKOOK.png", "BERU.png", "CEMRENUR18.png", "DUBALOBA.png",
-    "GAVATNUR.png", "HASANSÖR.png", "IOWF.png", "MELİBON.png", "MORSEX.png",
-    "MURO.png", "SAMO.png", "TESLAV2.png"
-  ];
-  
-  characters.forEach(char => {
-    const img = new Image();
-    img.src = `logos/characters/${char}`;
-  });
+  fetch('/api/characters')
+    .then(res => res.json())
+    .then(chars => {
+      if (Array.isArray(chars)) {
+        chars.forEach(char => {
+          if (char && char.image) {
+            const img = new Image();
+            img.src = char.image;
+          }
+        });
+        console.log(`[PRELOADER] ${chars.length} adet karakter görseli arka planda önbelleğe alındı.`);
+      }
+    })
+    .catch(err => {
+      console.error('[PRELOADER ERROR] Karakterler önbelleğe alınamadı:', err);
+    });
 }
 
