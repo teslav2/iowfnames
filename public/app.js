@@ -1033,6 +1033,7 @@ function renderLobbyPlayers(players) {
   spectatorList.innerHTML = '';
 
   players.forEach(p => {
+    const div = document.createElement('div');
     const autoGlowClass = p.team === 'red' ? 'glow-red' : (p.team === 'blue' ? 'glow-blue' : 'glow-gray');
     div.className = `player-item team-${p.team} ${p.playerId === localPlayerId ? 'me' : ''} ${autoGlowClass}`;
     div.setAttribute('data-player-row-id', p.id);
