@@ -924,6 +924,13 @@ if (btnCountInc) {
   });
 }
 
+if (inputClueWord) {
+  inputClueWord.addEventListener('input', () => {
+    // Only allow letters (including Turkish characters and accented ones), strip out numbers and symbols
+    inputClueWord.value = inputClueWord.value.replace(/[^a-zA-ZçÇğĞıİöÖşŞüÜâÂîÎûÛIı]/g, '');
+  });
+}
+
 if (clueForm) {
   clueForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -932,6 +939,12 @@ if (clueForm) {
 
     if (!word) {
       alert("İpucu boş olamaz.");
+      return;
+    }
+
+    // Double check with regex on submit
+    if (/[^A-ZÇĞİÖŞÜÂÎÛIı]/.test(word)) {
+      alert("İpucu sadece harflerden oluşmalıdır. Sayı veya sembol içeremez.");
       return;
     }
 

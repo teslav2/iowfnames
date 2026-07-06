@@ -60,6 +60,9 @@
         <div class="scale-selector-nav" style="display: flex; align-items: center; gap: 0.4rem; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--panel-border); padding: 0.35rem 0.6rem; border-radius: 8px; height: 32px; box-sizing: border-box; margin-right: 0.25rem;">
           <i class="fa-solid fa-up-right-and-down-left-from-center" style="font-size: 0.75rem; color: var(--text-muted); pointer-events: none;"></i>
           <select id="resolution-scale-select" style="background: transparent; border: none; color: #fff; outline: none; font-size: 0.75rem; font-family: var(--font-body); cursor: pointer; padding-right: 0.15rem; font-weight: bold;">
+            <option value="1.5" style="background: #0b0f19; color: #fff;">%150</option>
+            <option value="1.4" style="background: #0b0f19; color: #fff;">%140</option>
+            <option value="1.3" style="background: #0b0f19; color: #fff;">%130</option>
             <option value="1.2" style="background: #0b0f19; color: #fff;">%120 (Çok Büyük)</option>
             <option value="1.1" style="background: #0b0f19; color: #fff;">%110 (Büyük)</option>
             <option value="1.0" style="background: #0b0f19; color: #fff;" selected>%100 (Varsayılan)</option>
@@ -157,19 +160,35 @@
 
             <!-- Tab 2: Changelog -->
             <div class="info-tab-content" id="tab-changelog">
-              <div class="changelog-item">
+              <!-- v1.4.0 -->
+              <div class="changelog-item" style="margin-bottom: 1.5rem;">
                 <div class="changelog-header">
-                  <span class="version">v1.3.0</span>
+                  <span class="version">v1.4.0</span>
                   <span class="date">Bugün</span>
                 </div>
                 <ul>
-                  <li>Masaüstü ve geniş ekranlar için **Ekran Ölçeği / Çözünürlük Ayarı** eklendi! 🖥️</li>
-                  <li>Kelimelerin devasa büyümesini önlemek için **Gelişmiş Kart ve Arayüz Hizalaması** yapıldı.</li>
-                  <li>Sıradaki takımı daha net hissettiren **Gelişmiş Neon Arka Plan Parlamaları** eklendi! 🔴🔵</li>
-                  <li>Süre ve durum paneline sıra göstergesi olarak parıldayan **Dev Yön Okları** yerleştirildi.</li>
+                  <li><strong>Yapay Zekalı Akıllı Botlar</strong>: Test modunda Merve, Berk, Ahmet ve Murat isimli gerçekçi Türkçe botlar ve kelime ilişkilendirme motoru eklendi. 🤖</li>
+                  <li><strong>Dinamik Ön-Yükleme (Preloader)</strong>: Yeni eklenen KLAXXOUN karakteri ve tüm karakter görsellerinin oyuna sıfır gecikmeyle jilet gibi yüklenmesi sağlandı. ⚡</li>
+                  <li><strong>Lobi Kodu ve Bağlantı Koruması</strong>: 3 haneli oda kodları aktif lobilerde gizlendi ve F5 sayfa yenilemelerinde bağlantı kopma yarışı engellendi. 🔑</li>
+                  <li><strong>Hızlı Ana Sayfa Yönlendirmesi</strong>: Sol üstteki marka logosu tıklanabilir yapılarak hızlıca ana sayfaya dönüş butonu haline getirildi. 🏠</li>
+                  <li><strong>Aktivite Günlüğü ve Düzenlemeler</strong>: Tetikçi kartlarının günlük (log) panelindeki rengi siyah olarak güncellendi ve lobi butonu giriş alanına taşındı. 📓</li>
+                </ul>
+              </div>
+
+              <!-- v1.3.0 -->
+              <div class="changelog-item">
+                <div class="changelog-header">
+                  <span class="version">v1.3.0</span>
+                  <span class="date">Dün</span>
+                </div>
+                <ul>
+                  <li>Masaüstü ve geniş ekranlar için <strong>Ekran Ölçeği / Çözünürlük Ayarı</strong> eklendi! 🖥️</li>
+                  <li>Kelimelerin devasa büyümesini önlemek için <strong>Gelişmiş Kart ve Arayüz Hizalaması</strong> yapıldı.</li>
+                  <li>Sıradaki takımı daha net hissettiren <strong>Gelişmiş Neon Arka Plan Parlamaları</strong> eklendi! 🔴🔵</li>
+                  <li>Süre ve durum paneline sıra göstergesi olarak parıldayan <strong>Dev Yön Okları</strong> yerleştirildi.</li>
                   <li>Özelleştirilmiş takım isimlerinin geçmiş panelinde (log) görünmeme hatası düzeltildi.</li>
-                  <li>Ekranı kaplayan sohbeti gizlemek için **Sohbeti Gizle/Göster** butonu eklendi.</li>
-                  <li>İletişim paneline **İnteraktif Geri Bildirim Formu** ve `/admin` yönetim arayüzü kuruldu! 📬</li>
+                  <li>Ekranı kaplayan sohbeti gizlemek için <strong>Sohbeti Gizle/Göster</strong> butonu eklendi.</li>
+                  <li>İletişim paneline <strong>İnteraktif Geri Bildirim Formu</strong> ve `/admin` yönetim arayüzü kuruldu! 📬</li>
                 </ul>
               </div>
             </div>

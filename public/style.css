@@ -3386,15 +3386,34 @@ body {
 }
 
 .changelog-item ul {
+  list-style: none;
   margin: 0;
-  padding-left: 1.1rem;
+  padding-left: 0;
 }
 
 .changelog-item li {
+  position: relative;
   font-size: 0.82rem;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.75);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.6rem;
+  padding-left: 1.2rem;
+}
+
+.changelog-item li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  color: #ffd700;
+  font-size: 0.85rem;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
+}
+
+.changelog-item li strong {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.25);
+  font-weight: 800;
 }
 
 /* Mobile responsive adjustments */

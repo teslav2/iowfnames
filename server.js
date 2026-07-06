@@ -1474,9 +1474,15 @@ io.on('connection', (socket) => {
         return socket.emit('errorMsg', 'İpucu zaten verilmiş. Ekibin tahmin yapması bekleniyor.');
       }
 
+      // Restrict clueWord to letters only (including Turkish letters and accented variants)
+      const sanitizedClue = clueWord ? clueWord.toUpperCase().trim() : '';
+      if (!sanitizedClue || /[^A-ZÇĞİÖŞÜÂÎÛIı]/.test(sanitizedClue)) {
+        return socket.emit('errorMsg', 'İpucu sadece harflerden oluşmalıdır, sayı veya sembol içeremez.');
+      }
+
       // Set clue
       currentTurn.clue = {
-        word: clueWord.toUpperCase().trim(),
+        word: sanitizedClue,
         count: parseInt(clueCount),
         remainingGuesses: parseInt(clueCount) === 0 ? 25 : parseInt(clueCount) + 1
       };
