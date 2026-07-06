@@ -428,7 +428,7 @@ app.get('/api/lobbies', (req, res) => {
     const publicLobbies = [];
     for (const code in rooms) {
       const room = rooms[code];
-      if (room.isPublic && !room.gameStarted) {
+      if (!room.gameStarted) {
         const humanPlayers = room.players.filter(p => !p.isBot && p.connected);
         const host = room.players.find(p => p.isHost);
         publicLobbies.push({
@@ -1259,17 +1259,17 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 4.5. Toggle Public/Private Lobby (Host Only)
-  socket.on('togglePublic', () => {
+  // 4.5. Update Room Password (Host Only)
+  socket.on('updateRoomPassword', ({ password }) => {
     try {
       if (!currentRoomCode || !rooms[currentRoomCode]) return;
       const room = rooms[currentRoomCode];
-      if (!isHost(room)) return socket.emit('errorMsg', 'Lobi gizliliğini sadece lider değiştirebilir.');
+      if (!isHost(room)) return socket.emit('errorMsg', 'Oda şifresini sadece lider değiştirebilir.');
 
-      room.isPublic = !room.isPublic;
+      room.password = password ? password.trim() : '';
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
     } catch (e) {
-      console.error("togglePublic error:", e);
+      console.error("updateRoomPassword error:", e);
     }
   });
 

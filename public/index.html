@@ -160,6 +160,20 @@
 
             <!-- Tab 2: Changelog -->
             <div class="info-tab-content" id="tab-changelog">
+              <!-- v1.4.5 -->
+              <div class="changelog-item" style="margin-bottom: 1.5rem;">
+                <div class="changelog-header">
+                  <span class="version">v1.4.5</span>
+                  <span class="date">Bugün</span>
+                </div>
+                <ul>
+                  <li><strong>Lobi Şifre Sistemi Güncellendi</strong>: Lobi kurucu panelinden "Herkese Açık / Gizli" toggle ayarı kaldırıldı. Tüm odalar artık Aktif Lobiler listesinde listelenecek. 🔑</li>
+                  <li><strong>Oda Kilitleme & Onaylama</strong>: Lobiye kurucu tarafından "ONAYLA" butonu ile şifre koyulup kaldırılabilmesi sağlandı. Şifreli odalar listede 🔒 (kilit) simgesiyle, şifresiz odalar ise 🌍 simgesiyle gösterilir. 🔒</li>
+                  <li><strong>Gelişmiş Giriş Modalı</strong>: Şifreli bir odaya direkt bağlantıyla (linkle) ya da listeden tıklandığında hem takma ad hem de şifre doğrulama alanı sunulması sağlandı. 🛡️</li>
+                  <li><strong>Sohbet Sekmesi Okunurluk Düzeltmesi</strong>: Oyun ekranında "Genel Sohbet" sekmesi aktifken koyu renk olan yazıların okunurluğu parlak açık maviye çekilerek düzeltildi. 💬</li>
+                </ul>
+              </div>
+
               <!-- v1.4.0 -->
               <div class="changelog-item" style="margin-bottom: 1.5rem;">
                 <div class="changelog-header">
@@ -222,7 +236,7 @@
                 <h2>IOWFNAMES</h2>
                 <img src="/logos/logo.png" alt="Logo" class="card-header-logo-img">
               </div>
-              <div class="version-display" style="font-size: 0.8rem; color: #00D2FF; font-weight: 700; margin-top: -0.5rem; margin-bottom: 0.5rem; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0, 210, 255, 0.6); text-align: center;">VERSION: 1.4.0</div>
+              <div class="version-display" style="font-size: 0.8rem; color: #00D2FF; font-weight: 700; margin-top: -0.5rem; margin-bottom: 0.5rem; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0, 210, 255, 0.6); text-align: center;">VERSION: 1.4.5</div>
               <p>IOWFNAMES Kelimelerin ardındaki gizli bağlantıları keşfedin.<br>
               Takımınızı zafere taşıyın. Tek ipucu. Sayısız ihtimal.</p>
             </div>
@@ -283,21 +297,15 @@
               </div>
             </div>
 
-            <div id="public-toggle-container" class="public-toggle-container" style="display: none;">
-              <label class="toggle-switch">
-                <input type="checkbox" id="toggle-public-checkbox">
-                <span class="toggle-slider"></span>
-              </label>
-              <span class="label" style="font-size: 0.72rem;">HERKESE AÇIK LOBİ</span>
-              <span id="public-status-badge" class="public-status-badge private">GİZLİ</span>
-              
+            <div id="public-toggle-container" class="public-toggle-container" style="display: flex; align-items: center;">
               <!-- Password Settings (Masked input, only editable by host, copy next to it) -->
-              <div id="lobby-password-controls-container" style="display: flex; align-items: center; gap: 0.4rem; border-left: 1px solid rgba(255, 255, 255, 0.15); padding-left: 0.75rem; margin-left: 0.75rem;">
+              <div id="lobby-password-controls-container" style="display: flex; align-items: center; gap: 0.4rem;">
                 <span class="label" style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; white-space: nowrap;">ODA ŞİFRESİ:</span>
                 <div class="input-wrapper" style="margin-bottom: 0; width: 110px; height: 32px; display: flex; align-items: center; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 0;">
                   <i class="fa-solid fa-lock" style="font-size: 0.7rem; margin-left: 0.45rem; color: var(--text-muted);"></i>
                   <input type="password" id="lobby-set-password-input" placeholder="Şifresiz" maxlength="15" style="background: none; border: none; color: #fff; font-size: 0.8rem; width: 100%; padding: 0.15rem 0.35rem; outline: none; box-sizing: border-box;">
                 </div>
+                <button id="btn-set-lobby-password" class="btn btn-primary" style="height: 32px; font-size: 0.7rem; padding: 0 0.75rem; border-radius: 6px; font-weight: bold; white-space: nowrap; background: #013368; border: 1px solid rgba(255,255,255,0.1); color: #fff; cursor: pointer;">ONAYLA</button>
                 <button id="copy-lobby-password-btn" class="small-btn" title="Şifreyi Kopyala" style="width: 32px; height: 32px; border-radius: 6px;"><i class="fa-solid fa-copy" style="font-size: 0.75rem;"></i></button>
               </div>
             </div>

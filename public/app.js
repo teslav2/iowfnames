@@ -321,6 +321,11 @@ if (typeof io !== 'undefined') {
     safeSetStorage('roomCode', roomCode);
     safeSetStorage('playerName', player.name);
 
+    const modal = document.getElementById('username-modal-overlay');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+
     syncRoomCodeDisplay();
     switchScreen(screenLobby);
   });
@@ -426,24 +431,33 @@ if (typeof io !== 'undefined') {
       safeSetValue(wordPoolSelect, roomData.settings.wordPool);
     }
 
-    // Sync Public/Private toggle (host only visibility)
-    const publicToggleContainer = document.getElementById('public-toggle-container');
-    const publicCheckbox = document.getElementById('toggle-public-checkbox');
-    const publicBadge = document.getElementById('public-status-badge');
-    if (publicToggleContainer) {
-      publicToggleContainer.style.display = isAdmin ? 'flex' : 'none';
-    }
-    if (publicCheckbox) {
-      publicCheckbox.checked = roomData.isPublic;
-    }
-    if (publicBadge) {
-      if (roomData.isPublic) {
-        publicBadge.textContent = 'AÇIK';
-        publicBadge.className = 'public-status-badge public';
+    // Sync Room Password controls
+    const lobbySetPasswordInput = document.getElementById('lobby-set-password-input');
+    const btnSetLobbyPassword = document.getElementById('btn-set-lobby-password');
+    const copyLobbyPasswordBtn = document.getElementById('copy-lobby-password-btn');
+
+    if (lobbySetPasswordInput) {
+      if (isAdmin) {
+        // Host can edit password
+        lobbySetPasswordInput.disabled = false;
+        // Don't overwrite what host is currently typing if they are focused
+        if (document.activeElement !== lobbySetPasswordInput) {
+          lobbySetPasswordInput.value = roomData.password || '';
+        }
+        lobbySetPasswordInput.placeholder = 'Şifresiz';
       } else {
-        publicBadge.textContent = 'GİZLİ';
-        publicBadge.className = 'public-status-badge private';
+        // Guest cannot edit
+        lobbySetPasswordInput.disabled = true;
+        lobbySetPasswordInput.value = roomData.password ? '••••••••' : '';
+        lobbySetPasswordInput.placeholder = 'Şifresiz';
       }
+    }
+
+    if (btnSetLobbyPassword) {
+      btnSetLobbyPassword.style.display = isAdmin ? 'inline-block' : 'none';
+    }
+    if (copyLobbyPasswordBtn) {
+      copyLobbyPasswordBtn.style.display = (isAdmin && roomData.password) ? 'inline-block' : 'none';
     }
 
 
@@ -629,12 +643,26 @@ if (refreshLobbiesBtn) {
   refreshLobbiesBtn.addEventListener('click', fetchAndRenderLobbies);
 }
 
-// --- PUBLIC/PRIVATE TOGGLE ---
-const togglePublicCheckbox = document.getElementById('toggle-public-checkbox');
-if (togglePublicCheckbox) {
-  togglePublicCheckbox.addEventListener('change', () => {
+// --- LOBBY PASSWORD SET AND COPY ---
+const btnSetLobbyPassword = document.getElementById('btn-set-lobby-password');
+if (btnSetLobbyPassword) {
+  btnSetLobbyPassword.addEventListener('click', () => {
+    const passwordInput = document.getElementById('lobby-set-password-input');
+    const password = passwordInput ? passwordInput.value.trim() : '';
     if (socket) {
-      socket.emit('togglePublic');
+      socket.emit('updateRoomPassword', { password });
+      alert("Oda şifresi güncellendi.");
+    }
+  });
+}
+
+if (copyLobbyPasswordBtn) {
+  copyLobbyPasswordBtn.addEventListener('click', () => {
+    const passwordInput = document.getElementById('lobby-set-password-input');
+    if (passwordInput && passwordInput.value && !passwordInput.disabled) {
+      navigator.clipboard.writeText(passwordInput.value)
+        .then(() => alert("Şifre kopyalandı!"))
+        .catch(err => console.error("Kopyalama hatası:", err));
     }
   });
 }
@@ -700,27 +728,6 @@ if (shareRoomBtn) {
   });
 }
 
-if (lobbySetPasswordInput) {
-  lobbySetPasswordInput.addEventListener('change', () => {
-    const pw = lobbySetPasswordInput.value.trim();
-    if (socket) {
-      socket.emit('updatePassword', { password: pw });
-    }
-  });
-}
-
-if (copyLobbyPasswordBtn) {
-  copyLobbyPasswordBtn.addEventListener('click', () => {
-    if (lobbySetPasswordInput) {
-      const pw = lobbySetPasswordInput.value;
-      if (pw && pw !== "••••••••") {
-        navigator.clipboard.writeText(pw).then(() => {
-          alert("Lobi şifresi kopyalandı!");
-        });
-      }
-    }
-  });
-}
 
 // Settings changes
 if (turnDurationSelect) {
