@@ -397,19 +397,6 @@ if (typeof io !== 'undefined') {
 
     // Show/Hide admin settings
     const isAdmin = socket.id === roomAdminId;
-    
-    // Sync password settings on the lobby screen
-    if (lobbySetPasswordInput) {
-      if (isAdmin) {
-        lobbySetPasswordInput.disabled = false;
-        lobbySetPasswordInput.value = roomData.password || "";
-        if (copyLobbyPasswordBtn) copyLobbyPasswordBtn.style.display = 'flex';
-      } else {
-        lobbySetPasswordInput.disabled = true;
-        lobbySetPasswordInput.value = roomData.password ? "••••••••" : "";
-        if (copyLobbyPasswordBtn) copyLobbyPasswordBtn.style.display = 'none';
-      }
-    }
 
     safeSetDisplay(lobbyAdminControls, isAdmin ? 'block' : 'none');
     safeSetDisplay(startGameBtn, isAdmin ? 'block' : 'none');
@@ -432,9 +419,7 @@ if (typeof io !== 'undefined') {
     }
 
     // Sync Room Password controls
-    const lobbySetPasswordInput = document.getElementById('lobby-set-password-input');
     const btnSetLobbyPassword = document.getElementById('btn-set-lobby-password');
-    const copyLobbyPasswordBtn = document.getElementById('copy-lobby-password-btn');
 
     if (lobbySetPasswordInput) {
       if (isAdmin) {
