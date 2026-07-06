@@ -496,13 +496,16 @@ const roomCleanupTimers = {};
 // Disconnection timers for players (reconnect grace period)
 const playerDisconnectTimers = {};
 
-// Helper: Generate random 6-character room code
+// Helper: Generate random 3-character room code
 function generateRoomCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  do {
+    code = '';
+    for (let i = 0; i < 3; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+  } while (rooms[code]);
   return code;
 }
 
@@ -636,6 +639,11 @@ function initGame(room) {
   
   const startingTeamName = startingTeam === 'red' ? room.gameState.teamNames.red : room.gameState.teamNames.blue;
   addLog(room, `Oyun başladı! İlk hamle sırası "${startingTeamName}" anlatıcısında.`);
+
+  // Auto trigger bot if starting spymaster is bot
+  setTimeout(() => {
+    checkAndTriggerBotTurn(room);
+  }, 1000);
 }
 
 function addLog(room, text) {
@@ -646,6 +654,226 @@ function addLog(room, text) {
       room.gameState.log.shift();
     }
   }
+}
+
+// ============================================================
+// BOT AI CONFIGURATION & TURN PLAY LOGIC
+// ============================================================
+const botAssociations = {
+  // Standard and common Turkish Codenames words
+  "ADA": "DENİZ", "AFRİKA": "SICAK", "AHTAPOT": "DENİZ", "AJAN": "CASUS", "AKIL": "BEYİN", 
+  "AKREP": "ZEHİR", "AKŞAM": "GECE", "ALAY": "ASKER", "ALEV": "YANGIN", "ALTIN": "DEĞERLİ", 
+  "AMERİKA": "KITA", "ANAHTAR": "KAPAT", "ANNE": "AİLE", "ARABA": "MOTOR", "ARI": "BAL", 
+  "ARKADAŞ": "DOST", "ARMUT": "MEYVE", "ASKER": "SAVAŞ", "ASLAN": "ORMAN", "ASTRONOT": "UZAY", 
+  "AT": "BİNEK", "ATEŞ": "SICAK", "ATKI": "SOĞUK", "ATLET": "SPORCU", "ATOM": "BİLİM", 
+  "AVUKAT": "MAHKEME", "AY": "GECE", "AYAK": "VÜCUT", "AYAKKABI": "GİYİM", "AYI": "ORMAN", 
+  "AYNA": "CAM", "AĞAÇ": "DOĞA", "AĞIZ": "VÜCUT", "BABA": "AİLE", "BAHÇE": "ÇİÇEK", 
+  "BAL": "ARI", "BALIK": "DENİZ", "BALON": "UÇAN", "BALTA": "ODUN", "BANKA": "PARA", 
+  "BARDAK": "SU", "BARIŞ": "SAVAŞ", "BEBEK": "KÜÇÜK", "BEYAZ": "RENK", "BEYİN": "ORGAN", 
+  "BIÇAK": "KESKİN", "BOKS": "SPOR", "BOYA": "RENK", "BOYUN": "VÜCUT", "BULUT": "GÖKYÜZÜ", 
+  "BURUN": "KOKU", "BUZ": "SOĞUK", "BÖREK": "YEMEK", "BİBER": "ACI", "BİLET": "ULAŞIM",
+  "BİLGİSAYAR": "TEKNOLOJİ", "BİLİM": "LABORATUVAR", "BİSİKLET": "TEKERLEK",
+  // Gamer words (Tesla Modu)
+  "TESLA": "BOBİN", "YAYINCI": "TWITCH", "KLAVYE": "TUŞ", "KULAKLIK": "SES", "MONİTÖR": "EKRAN", 
+  "YAYIN": "CANLI", "SPONSOR": "PARA", "MODERATÖR": "YETKİLİ", "ABONE": "YOUTUBE", 
+  "TWITCH": "YAYIN", "KANAL": "TV", "VİDEO": "İZLE", "BAĞIŞ": "DESTEK", "CHAT": "SOHBET", 
+  "DİSCORD": "SUNUCU", "BOT": "YAZILIM", "YAPAY ZEKA": "ROBOT", "KOD": "YAZILIM", 
+  "ROBOT": "METAL", "CYBERPUNK": "GELECEK", "MATRIX": "HAP", "NVIDIA": "EKRANKARTI", 
+  "STEAM": "OYUN", "VALORANT": "NİŞANCI", "LEAGUE": "MOBA", "COUNTER": "TERÖR", 
+  "GTA": "ARABA", "MİNECRAFT": "BLOK", "ROBLOX": "OYUN", "KONSOL": "PLAYSTATION", 
+  "XBOX": "KONSOL", "GAMEPAD": "KOL", "PİKSEL": "GRAFİK", "GRAFİK": "TASARIM", 
+  "FPS": "HIZ", "PING": "LAG", "LAG": "İNTERNET", "LOBİ": "ODA", "KART": "DESTE", 
+  "ŞAMPİYON": "BİRİNCİ", "TURNUVA": "KUPA", "KLAN": "LONCA", "TAKIM": "BİRLİK", 
+  "RÜTBE": "SEVİYE", "LEVEL": "XP", "XP": "PUAN", "GOLD": "ALTIN", "ELMAS": "DEĞERLİ", 
+  "ZIRH": "SAVUNMA", "KILIÇ": "SAVAŞ", "KALKAN": "KORUMA", "BÜYÜ": "ASSA", "İKSİR": "CAN", 
+  "CANAVAR": "YARATIK", "ZOMBİ": "ÖLÜ", "VAMPİR": "KAN", "KURTADAM": "DOLUNAY", 
+  "UZAY": "GALAXY", "MARS": "GEZEGEN", "NASA": "UZAY", "ROKET": "UZAY", "UYDU": "DÜNYA", 
+  "GEZEGEN": "DÜNYA", "ASTEROİD": "TAŞ", "GALAKSİ": "SAMANYOLU", "ANİME": "ÇİZGİFİLM", 
+  "MANGA": "KİTAP", "COSPLAY": "KOSTÜM", "SİBER": "GÜVENLİK", "TEKNOLOJİ": "BİLİM", 
+  "İNTERNET": "AĞ", "EKRAN": "GÖRÜNTÜ", "MOUSE": "FARE", "PED": "HIZLI", "WIFI": "KABLOSUZ"
+};
+
+// Check if it is a Bot's turn and trigger its action automatically
+function checkAndTriggerBotTurn(room) {
+  if (!room || !room.gameState || room.gameState.winner) return;
+
+  const currentTurn = room.gameState.currentTurn;
+  const activeBot = room.players.find(p => p.isBot && p.team === currentTurn.team && p.role === currentTurn.role);
+
+  if (!activeBot) return; // Not a bot's turn
+
+  console.log(`[BOT AI] Sıra bot oyuncuda: ${activeBot.name} (${activeBot.team} - ${activeBot.role})`);
+
+  // Clear any existing bot timers on the room
+  if (room.botTimer) {
+    clearTimeout(room.botTimer);
+    room.botTimer = null;
+  }
+
+  // Set delayed execution to simulate thinking time (3 seconds)
+  room.botTimer = setTimeout(() => {
+    try {
+      if (!room.gameState || room.gameState.winner) return;
+
+      const latestTurn = room.gameState.currentTurn;
+      if (latestTurn.team !== activeBot.team || latestTurn.role !== activeBot.role) return;
+
+      if (activeBot.role === 'spymaster') {
+        performBotSpymasterTurn(room, activeBot);
+      } else {
+        performBotAgentTurn(room, activeBot);
+      }
+    } catch (err) {
+      console.error("[BOT AI ERROR]:", err);
+    }
+  }, 3000);
+}
+
+function performBotSpymasterTurn(room, activeBot) {
+  const gameState = room.gameState;
+  const team = activeBot.team;
+
+  // Find remaining cards for this team
+  const teamCards = gameState.board.filter(c => c.color === team && !c.revealed);
+  if (teamCards.length === 0) return;
+
+  // Randomly select one target card
+  const targetCard = teamCards[Math.floor(Math.random() * teamCards.length)];
+  const targetWord = targetCard.word;
+
+  // Find association clue word
+  let clueWord = botAssociations[targetWord.toUpperCase()];
+  if (!clueWord) {
+    clueWord = targetWord.substring(0, Math.min(5, targetWord.length)) + "X";
+  }
+
+  // Submit clue state update
+  gameState.currentTurn.role = 'agent';
+  gameState.currentTurn.clue = {
+    word: clueWord.toUpperCase(),
+    count: 1,
+    remainingGuesses: 2 // 1 + 1 extra guess
+  };
+
+  // Save the bot's target card so the bot agent knows what to guess
+  gameState.botTargetCardIndex = gameState.board.indexOf(targetCard);
+
+  const teamName = team === 'red' ? gameState.teamNames.red : gameState.teamNames.blue;
+  addLog(room, `💡 ${activeBot.name} (${teamName} Anlatıcı) ipucu verdi: "${clueWord.toUpperCase()} (1)"`);
+  
+  startServerTimer(room.roomCode); // Reset turn timer for agents
+  io.to(room.roomCode).emit('roomState', getRoomClientData(room.roomCode));
+
+  // Trigger agent bot guessing immediately
+  checkAndTriggerBotTurn(room);
+}
+
+function performBotAgentTurn(room, activeBot) {
+  const gameState = room.gameState;
+  const team = activeBot.team;
+
+  // Find all remaining cards on the board
+  const unrevealedCards = gameState.board.map((c, idx) => ({ c, idx })).filter(item => !item.c.revealed);
+  if (unrevealedCards.length === 0) return;
+
+  let selectedIndex = -1;
+  const targetIdx = gameState.botTargetCardIndex;
+  const hasTarget = targetIdx !== undefined && targetIdx !== null && !gameState.board[targetIdx].revealed;
+
+  // Bot play odds:
+  // 85% chance of picking a correct card
+  // 10% chance of picking neutral
+  // 5% chance of picking assassin
+  const roll = Math.random();
+
+  if (roll < 0.85) {
+    if (hasTarget && Math.random() < 0.95) {
+      selectedIndex = targetIdx;
+    } else {
+      const teamCards = unrevealedCards.filter(item => item.c.color === team);
+      if (teamCards.length > 0) {
+        selectedIndex = teamCards[Math.floor(Math.random() * teamCards.length)].idx;
+      }
+    }
+  } else if (roll < 0.95) {
+    const neutralCards = unrevealedCards.filter(item => item.c.color === 'neutral');
+    if (neutralCards.length > 0) {
+      selectedIndex = neutralCards[Math.floor(Math.random() * neutralCards.length)].idx;
+    }
+  } else {
+    const assassinCards = unrevealedCards.filter(item => item.c.color === 'assassin');
+    if (assassinCards.length > 0) {
+      selectedIndex = assassinCards[0].idx;
+    }
+  }
+
+  // Fallback if no index selected
+  if (selectedIndex === -1) {
+    selectedIndex = unrevealedCards[Math.floor(Math.random() * unrevealedCards.length)].idx;
+  }
+
+  const card = gameState.board[selectedIndex];
+  card.revealed = true;
+  card.stage = 1; // character visible, word hidden
+  card.clickedBy = activeBot.name;
+  card.thinkingBy = [];
+
+  const teamName = team === 'red' ? gameState.teamNames.red : gameState.teamNames.blue;
+  let cardResultText = '';
+  if (card.color === 'red') cardResultText = 'Kırmızı Ekip 🔴';
+  else if (card.color === 'blue') cardResultText = 'Mavi Ekip 🔵';
+  else if (card.color === 'neutral') cardResultText = 'Masum Sivil ⚪';
+  else if (card.color === 'assassin') cardResultText = 'Tetikçi/Suikastçı 💀';
+
+  addLog(room, `🎯 ${activeBot.name} "${card.word}" kartını seçti. Sonuç: ${cardResultText}`);
+
+  if (card.color === 'assassin') {
+    const opposingTeam = team === 'red' ? 'blue' : 'red';
+    gameState.winner = opposingTeam;
+    const oppTeamName = opposingTeam === 'red' ? gameState.teamNames.red : gameState.teamNames.blue;
+    addLog(room, `⚠️ TETİKÇİ KARTI AÇILDI! ${teamName} kaybetti. Kazanan: ${oppTeamName}!`);
+    stopServerTimer(room.roomCode);
+  } else if (card.color === team) {
+    // Correct guess
+    gameState.scores[team]--;
+    if (gameState.scores[team] === 0) {
+      gameState.winner = team;
+      addLog(room, `🎉 TEBRİKLER! ${teamName} tüm kelimeleri bularak kazandı!`);
+      stopServerTimer(room.roomCode);
+    } else {
+      gameState.currentTurn.clue.remainingGuesses--;
+      if (gameState.currentTurn.clue.remainingGuesses <= 0) {
+        switchTurn(room);
+      } else {
+        // Guess again!
+        checkAndTriggerBotTurn(room);
+      }
+    }
+  } else if (card.color === 'neutral') {
+    switchTurn(room);
+  } else {
+    // Opposing team card opened
+    const opposingTeam = team === 'red' ? 'blue' : 'red';
+    gameState.scores[opposingTeam]--;
+    if (gameState.scores[opposingTeam] === 0) {
+      gameState.winner = opposingTeam;
+      const oppTeamName = opposingTeam === 'red' ? gameState.teamNames.red : gameState.teamNames.blue;
+      addLog(room, `🎉 ${oppTeamName} tüm kelimeleri açıldığı için kazandı!`);
+      stopServerTimer(room.roomCode);
+    } else {
+      switchTurn(room);
+    }
+  }
+
+  // Clear target index if revealed
+  if (selectedIndex === targetIdx) {
+    gameState.botTargetCardIndex = null;
+  }
+
+  io.to(room.roomCode).emit('roomState', getRoomClientData(room.roomCode));
+
+  // Trigger next bot turn if active
+  checkAndTriggerBotTurn(room);
 }
 
 // Get clean room state for client consumption
@@ -721,6 +949,11 @@ function switchTurn(room) {
   const nextTeamName = nextTeam === 'red' ? room.gameState.teamNames.red : room.gameState.teamNames.blue;
   addLog(room, `Sıra "${nextTeamName}" anlatıcısına geçti.`);
   startServerTimer(room.roomCode);
+
+  // Auto trigger bot if next player is bot
+  setTimeout(() => {
+    checkAndTriggerBotTurn(room);
+  }, 1000);
 }
 
 // Socket Connection handling
@@ -1191,16 +1424,16 @@ io.on('connection', (socket) => {
       const blueAgent = room.players.find(p => p.team === 'blue' && p.role === 'agent');
 
       if (!redSpymaster) {
-        room.players.push({ id: 'bot-red-spymaster', playerId: 'bot-red-spymaster', name: 'Bot Anlatıcı K', team: 'red', role: 'spymaster', isHost: false, isBot: true, connected: true });
+        room.players.push({ id: 'bot-red-spymaster', playerId: 'bot-red-spymaster', name: 'Merve (Bot)', team: 'red', role: 'spymaster', isHost: false, isBot: true, connected: true, ready: true });
       }
       if (!redAgent) {
-        room.players.push({ id: 'bot-red-agent', playerId: 'bot-red-agent', name: 'Bot Ekip K', team: 'red', role: 'agent', isHost: false, isBot: true, connected: true });
+        room.players.push({ id: 'bot-red-agent', playerId: 'bot-red-agent', name: 'Berk (Bot)', team: 'red', role: 'agent', isHost: false, isBot: true, connected: true, ready: true });
       }
       if (!blueSpymaster) {
-        room.players.push({ id: 'bot-blue-spymaster', playerId: 'bot-blue-spymaster', name: 'Bot Anlatıcı M', team: 'blue', role: 'spymaster', isHost: false, isBot: true, connected: true });
+        room.players.push({ id: 'bot-blue-spymaster', playerId: 'bot-blue-spymaster', name: 'Ahmet (Bot)', team: 'blue', role: 'spymaster', isHost: false, isBot: true, connected: true, ready: true });
       }
       if (!blueAgent) {
-        room.players.push({ id: 'bot-blue-agent', playerId: 'bot-blue-agent', name: 'Bot Ekip M', team: 'blue', role: 'agent', isHost: false, isBot: true, connected: true });
+        room.players.push({ id: 'bot-blue-agent', playerId: 'bot-blue-agent', name: 'Murat (Bot)', team: 'blue', role: 'agent', isHost: false, isBot: true, connected: true, ready: true });
       }
 
       initGame(room);
@@ -1246,6 +1479,9 @@ io.on('connection', (socket) => {
       
       startServerTimer(currentRoomCode); // Reset timer for agent guessing phase
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
+
+      // Trigger bot turn if agent role is a bot
+      checkAndTriggerBotTurn(room);
     } catch (e) {
       console.error("submitClue error:", e);
     }
@@ -1502,6 +1738,11 @@ io.on('connection', (socket) => {
       room.gameStarted = false;
       room.gameEnded = false;
       room.gameState = null;
+
+      // Force bots to be ready on returning to lobby
+      room.players.forEach(p => {
+        if (p.isBot) p.ready = true;
+      });
 
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
     } catch (e) {

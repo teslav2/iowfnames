@@ -230,7 +230,7 @@
               <div class="join-box">
                 <div class="input-wrapper">
                   <i class="fa-solid fa-key"></i>
-                  <input type="text" id="room-code-input" placeholder="Lobi Kodu (6 Hane)..." maxlength="6">
+                  <input type="text" id="room-code-input" placeholder="Lobi Kodu (3 Hane)..." maxlength="3">
                 </div>
                 <button id="join-room-btn" class="btn btn-secondary">
                   Katıl <i class="fa-solid fa-right-to-bracket"></i>
@@ -529,8 +529,13 @@
               </div>
             </div>
             <!-- Activity Log (Moved to Left Side) -->
-            <div class="game-log-panel">
-              <div class="log-panel-header"><i class="fa-solid fa-clock-rotate-left"></i> GÜNLÜK</div>
+            <div class="game-log-panel" id="game-log-panel">
+              <div class="log-panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <span><i class="fa-solid fa-clock-rotate-left"></i> GÜNLÜK</span>
+                <button id="toggle-log-btn" class="chat-tab-btn" title="Günlüğü Gizle" style="border: none; background: transparent; padding: 0.2rem 0.5rem; cursor: pointer; color: var(--text-muted); font-size: 0.72rem; display: flex; align-items: center; gap: 0.25rem; margin-right: 0;">
+                  <i class="fa-solid fa-eye-slash"></i> Gizle
+                </button>
+              </div>
               <div class="log-messages" id="log-messages">
               </div>
             </div>

@@ -3720,6 +3720,17 @@ body {
   border-bottom: none !important;
 }
 
+/* Collapsed log panel states */
+.game-log-panel.collapsed .log-messages {
+  display: none !important;
+}
+.game-log-panel.collapsed {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+  border-bottom: none !important;
+  padding-bottom: 0.5rem !important;
+}
+
 /* Giant turn direction indicators next to timer */
 .turn-arrow {
   font-size: 2.4rem;

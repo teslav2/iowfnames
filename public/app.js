@@ -464,7 +464,7 @@ if (joinRoomBtn) {
     const name = usernameInput ? usernameInput.value.trim() : '';
     const code = roomCodeInput ? roomCodeInput.value.trim().toUpperCase() : '';
     if (!name) return alert("Lütfen bir isim girin.");
-    if (!code || code.length !== 6) return alert("Lütfen 6 haneli lobi kodunu girin.");
+    if (!code || code.length !== 3) return alert("Lütfen 3 haneli lobi kodunu girin.");
 
     if (socket) {
       socket.emit('joinRoom', { roomCode: code, name, playerId: localPlayerId });
@@ -1125,29 +1125,55 @@ function renderGame(gameState, playersList, roomSettings) {
   const isAgent = myPlayerInfo.role === 'agent';
   const isSpymaster = myPlayerInfo.role === 'spymaster';
 
-  // Sync turn indicator and room code in the top bar
+  // Sync turn indicator, winner status and timer display in the top bar
   const turnTeamName = document.getElementById('turn-team-name');
   const turnStatusText = document.getElementById('turn-status-text');
+  const timerWrap = document.getElementById('topbar-timer-wrap');
+
   if (turnTeamName) {
-    const turnTeamDisplayName = turn.team === 'red'
-      ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
-      : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
+    if (gameState.winner) {
+      const winnerTeamDisplayName = gameState.winner === 'red'
+        ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
+        : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
 
-    const teamSpan = turn.team === 'red'
-      ? `<span class="text-red">${escapeHTML(turnTeamDisplayName)}</span>`
-      : `<span class="text-blue">${escapeHTML(turnTeamDisplayName)}</span>`;
+      const teamSpan = gameState.winner === 'red'
+        ? `<span class="text-red font-bold">${escapeHTML(winnerTeamDisplayName)}</span>`
+        : `<span class="text-blue font-bold">${escapeHTML(winnerTeamDisplayName)}</span>`;
 
-    if (turn.role === 'spymaster') {
-      turnStatusText.innerHTML = `${teamSpan} Lideri düşünüyor`;
-      turnTeamName.textContent = '🤔';
+      turnStatusText.innerHTML = `${teamSpan} OYUNU KAZANDI! 🏆`;
+      turnTeamName.textContent = '🏆';
+
+      const turnIndicator = document.getElementById('turn-indicator');
+      if (turnIndicator) {
+        turnIndicator.className = `turn-indicator ${gameState.winner}`;
+      }
+
+      // Hide timer on game over
+      if (timerWrap) timerWrap.style.display = 'none';
     } else {
-      turnStatusText.innerHTML = `${teamSpan} Ekibi seçiyor`;
-      turnTeamName.textContent = '🎯';
-    }
+      const turnTeamDisplayName = turn.team === 'red'
+        ? (gameState.teamNames ? gameState.teamNames.red : 'KIRMIZI TAKIM')
+        : (gameState.teamNames ? gameState.teamNames.blue : 'MAVİ TAKIM');
 
-    const turnIndicator = document.getElementById('turn-indicator');
-    if (turnIndicator) {
-      turnIndicator.className = `turn-indicator ${turn.team}`;
+      const teamSpan = turn.team === 'red'
+        ? `<span class="text-red">${escapeHTML(turnTeamDisplayName)}</span>`
+        : `<span class="text-blue">${escapeHTML(turnTeamDisplayName)}</span>`;
+
+      if (turn.role === 'spymaster') {
+        turnStatusText.innerHTML = `${teamSpan} Lideri düşünüyor`;
+        turnTeamName.textContent = '🤔';
+      } else {
+        turnStatusText.innerHTML = `${teamSpan} Ekibi seçiyor`;
+        turnTeamName.textContent = '🎯';
+      }
+
+      const turnIndicator = document.getElementById('turn-indicator');
+      if (turnIndicator) {
+        turnIndicator.className = `turn-indicator ${turn.team}`;
+      }
+
+      // Show timer during active play
+      if (timerWrap) timerWrap.style.display = 'flex';
     }
   }
 
@@ -1723,12 +1749,12 @@ window.addEventListener('DOMContentLoaded', () => {
   // If no query parameter, check pathname (e.g. /AXMBFC)
   if (!roomCodeQuery) {
     const pathCode = window.location.pathname.substring(1).toUpperCase();
-    if (/^[A-Z]{6}$/.test(pathCode)) {
+    if (/^[A-Z]{3}$/.test(pathCode)) {
       roomCodeQuery = pathCode;
     }
   }
 
-  if (roomCodeQuery && roomCodeQuery.length === 6) {
+  if (roomCodeQuery && roomCodeQuery.length === 3) {
     if (roomCodeInput) roomCodeInput.value = roomCodeQuery.toUpperCase();
 
     // Auto-join as a guest spectator with a unique temporary name so we can render the lobby in the background
@@ -1927,6 +1953,22 @@ if (toggleChatBtn && gameChatPanel) {
     } else {
       toggleChatBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Gizle';
       toggleChatBtn.title = "Sohbeti Gizle";
+    }
+  });
+}
+
+// ============ LOG TOGGLE CONTROLLER ============
+const toggleLogBtn = document.getElementById('toggle-log-btn');
+const gameLogPanel = document.getElementById('game-log-panel');
+if (toggleLogBtn && gameLogPanel) {
+  toggleLogBtn.addEventListener('click', () => {
+    const isCollapsed = gameLogPanel.classList.toggle('collapsed');
+    if (isCollapsed) {
+      toggleLogBtn.innerHTML = '<i class="fa-solid fa-eye"></i> Göster';
+      toggleLogBtn.title = "Günlüğü Göster";
+    } else {
+      toggleLogBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Gizle';
+      toggleLogBtn.title = "Günlüğü Gizle";
     }
   });
 }
