@@ -240,6 +240,7 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
+  min-height: calc(100vh - 50px);
 }
 
 .landing-card {
@@ -481,19 +482,20 @@ body {
 }
 
 .lobby-middle-col .lobby-room-panel {
-  flex: 2; /* Stretch dynamically */
+  height: 280px !important;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .lobby-spectators-card {
   padding: 0.75rem !important;
-  flex: 1; /* Stretch dynamically */
+  height: 130px !important;
   display: flex;
   flex-direction: column;
-  min-height: 100px;
+  min-height: 0;
 }
 
 .lobby-spectators-card #spectator-list {
@@ -771,6 +773,7 @@ body {
   background: rgba(0,0,0,0.15);
   border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.02);
+  min-height: 0;
 }
 
 .chat-bubble {
@@ -3204,7 +3207,7 @@ body {
   gap: 2.5rem;
   max-width: 1100px;
   width: 90%;
-  margin: 2rem auto;
+  margin: 0 auto; /* Zero top/bottom margin for perfect vertical centering */
   align-items: stretch;
 }
 
@@ -3215,7 +3218,7 @@ body {
   border-radius: 24px !important;
   background: rgba(16, 22, 37, 0.7) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  height: 550px !important;
+  height: 580px !important; /* Increased height to prevent squeezed content */
   box-sizing: border-box !important;
   overflow: hidden !important; /* Keep tabs container self-scrolling */
 }
@@ -3224,7 +3227,7 @@ body {
 .landing-layout-grid .landing-card {
   margin: 0;
   max-width: none;
-  height: 550px !important;
+  height: 580px !important; /* Increased height to prevent squeezed content */
   display: flex;
   flex-direction: column;
   justify-content: center;
