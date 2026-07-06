@@ -67,10 +67,18 @@ const screenGame = document.getElementById('screen-game');
 
 // Landing Elements
 const usernameInput = document.getElementById('username-input');
-const lobbyPasswordInput = document.getElementById('lobby-password-input');
 const roomCodeInput = document.getElementById('room-code-input');
 const createRoomBtn = document.getElementById('create-room-btn');
 const joinRoomBtn = document.getElementById('join-room-btn');
+
+// Lobby Set Password & Custom Modal Elements
+const lobbySetPasswordInput = document.getElementById('lobby-set-password-input');
+const copyLobbyPasswordBtn = document.getElementById('copy-lobby-password-btn');
+const modalPasswordGroup = document.getElementById('modal-password-group');
+const modalPasswordInput = document.getElementById('modal-password-input');
+const modalPasswordError = document.getElementById('modal-password-error');
+const modalUsernameGroup = document.getElementById('modal-username-group');
+const usernameModalSubtitle = document.getElementById('username-modal-subtitle');
 
 // Lobby Elements
 const displayRoomCode = document.getElementById('display-room-code');
@@ -259,6 +267,17 @@ if (typeof io !== 'undefined') {
       return;
     }
     isAutoReconnecting = false;
+
+    // Show password errors directly in the modal instead of browser alerts
+    if (msg.includes('şifre') || msg.includes('Şifre') || msg.includes('password') || msg.includes('Password')) {
+      const modalErr = document.getElementById('modal-password-error');
+      if (modalErr) {
+        modalErr.textContent = msg;
+        modalErr.style.display = 'block';
+        return;
+      }
+    }
+
     alert(msg);
     // If room is not found, clear storage reconnect loop
     if (msg.includes('Oda bulunamadı')) {
@@ -307,9 +326,42 @@ if (typeof io !== 'undefined') {
   });
 
   socket.on('lobbyPasswordRequired', ({ roomCode, name }) => {
-    const pw = prompt("Bu oda şifrelidir. Lütfen oda şifresini girin:");
-    if (pw !== null) {
-      socket.emit('joinRoom', { roomCode, name, playerId: localPlayerId, password: pw });
+    // Show password prompt modal (our custom modal!)
+    const modal = document.getElementById('username-modal-overlay');
+    if (modal) {
+      if (modalPasswordError) modalPasswordError.style.display = 'none';
+      if (modalPasswordInput) modalPasswordInput.value = '';
+
+      // Check if they are joining via direct link
+      const urlParams = new URLSearchParams(window.location.search);
+      const roomCodeQuery = urlParams.get('room') || window.location.pathname.substring(1).toUpperCase();
+      const isDirectLink = /^[A-Z]{3}$/.test(roomCodeQuery);
+
+      if (isDirectLink) {
+        if (modalUsernameGroup) modalUsernameGroup.style.display = 'block';
+        if (modalPasswordGroup) modalPasswordGroup.style.display = 'block';
+        if (usernameModalSubtitle) {
+          usernameModalSubtitle.textContent = 'Bu oda şifrelidir. Giriş yapmak için takma adınızı ve oda şifresini girin.';
+        }
+      } else {
+        if (modalUsernameGroup) modalUsernameGroup.style.display = 'none';
+        if (modalPasswordGroup) modalPasswordGroup.style.display = 'block';
+        if (usernameModalSubtitle) {
+          usernameModalSubtitle.textContent = 'Bu oda şifrelidir. Lütfen oda şifresini girin.';
+        }
+      }
+
+      // Store target details on join button
+      const joinBtn = document.getElementById('modal-join-btn');
+      if (joinBtn) {
+        joinBtn.setAttribute('data-target-room-code', roomCode);
+        joinBtn.setAttribute('data-target-username', name);
+      }
+
+      modal.classList.add('active');
+      setTimeout(() => {
+        if (modalPasswordInput) modalPasswordInput.focus();
+      }, 150);
     }
   });
 
@@ -320,6 +372,12 @@ if (typeof io !== 'undefined') {
     activeRoomPassword = roomData.password || "";
     const me = roomData.players.find(p => p.playerId === localPlayerId);
     if (me) myPlayerInfo = me;
+
+    // Automatically close direct link username modal when successfully joined with a non-temporary name
+    if (me && !me.name.startsWith('Katılımcı#')) {
+      const usernameModal = document.getElementById('username-modal-overlay');
+      if (usernameModal) usernameModal.classList.remove('active');
+    }
 
     // Sync room code and password display
     syncRoomCodeDisplay();
@@ -334,6 +392,20 @@ if (typeof io !== 'undefined') {
 
     // Show/Hide admin settings
     const isAdmin = socket.id === roomAdminId;
+    
+    // Sync password settings on the lobby screen
+    if (lobbySetPasswordInput) {
+      if (isAdmin) {
+        lobbySetPasswordInput.disabled = false;
+        lobbySetPasswordInput.value = roomData.password || "";
+        if (copyLobbyPasswordBtn) copyLobbyPasswordBtn.style.display = 'flex';
+      } else {
+        lobbySetPasswordInput.disabled = true;
+        lobbySetPasswordInput.value = roomData.password ? "••••••••" : "";
+        if (copyLobbyPasswordBtn) copyLobbyPasswordBtn.style.display = 'none';
+      }
+    }
+
     safeSetDisplay(lobbyAdminControls, isAdmin ? 'block' : 'none');
     safeSetDisplay(startGameBtn, isAdmin ? 'block' : 'none');
 
@@ -627,6 +699,28 @@ if (shareRoomBtn) {
     navigator.clipboard.writeText(shareText).then(() => {
       alert("Lobi davet mesajı panoya kopyalandı!");
     });
+  });
+}
+
+if (lobbySetPasswordInput) {
+  lobbySetPasswordInput.addEventListener('change', () => {
+    const pw = lobbySetPasswordInput.value.trim();
+    if (socket) {
+      socket.emit('updatePassword', { password: pw });
+    }
+  });
+}
+
+if (copyLobbyPasswordBtn) {
+  copyLobbyPasswordBtn.addEventListener('click', () => {
+    if (lobbySetPasswordInput) {
+      const pw = lobbySetPasswordInput.value;
+      if (pw && pw !== "••••••••") {
+        navigator.clipboard.writeText(pw).then(() => {
+          alert("Lobi şifresi kopyalandı!");
+        });
+      }
+    }
   });
 }
 
@@ -1491,7 +1585,14 @@ function renderGame(gameState, playersList, roomSettings) {
   // 8. Sync footer role display
   let mTeamName = myPlayerInfo.team === 'red' ? (gameState.teamNames ? gameState.teamNames.red : 'Kırmızı') : myPlayerInfo.team === 'blue' ? (gameState.teamNames ? gameState.teamNames.blue : 'Mavi') : 'Gözcü';
   let mRoleName = myPlayerInfo.role === 'spymaster' ? 'Lider' : 'Ekip';
-  safeSetText(myRoleDisplay, myPlayerInfo.team === 'spectator' ? 'Gözcü' : `${mTeamName} ${mRoleName}`);
+  if (myRoleDisplay) {
+    if (myPlayerInfo.team === 'spectator') {
+      myRoleDisplay.innerHTML = `<span class="text-gray" style="color: #9ca3af;">Gözcü</span>`;
+    } else {
+      const colorClass = myPlayerInfo.team === 'red' ? 'text-red' : 'text-blue';
+      myRoleDisplay.innerHTML = `<span class="${colorClass}">${escapeHTML(mTeamName)}</span> ${escapeHTML(mRoleName)}`;
+    }
+  }
 
   // 9. Activity logs
   if (logMessages) {
@@ -1931,15 +2032,66 @@ const modalUsernameInput = document.getElementById('modal-username-input');
 const modalJoinBtn = document.getElementById('modal-join-btn');
 
 function submitGuestUsername() {
-  if (!modalUsernameInput) return;
+  if (!modalUsernameInput || !modalPasswordInput) return;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  let roomCodeQuery = urlParams.get('room');
+  if (!roomCodeQuery) {
+    const pathCode = window.location.pathname.substring(1).toUpperCase();
+    if (/^[A-Z]{3}$/.test(pathCode)) {
+      roomCodeQuery = pathCode;
+    }
+  }
+
   const name = modalUsernameInput.value.trim();
-  if (!name) {
-    alert("Lütfen geçerli bir takma ad girin.");
+  const password = modalPasswordInput.value.trim();
+
+  // If password field is active/visible, they must enter a password
+  const isPasswordVisible = modalPasswordGroup && modalPasswordGroup.style.display !== 'none';
+
+  if (isPasswordVisible && !password) {
+    if (modalPasswordError) {
+      modalPasswordError.textContent = "Lütfen oda şifresini girin.";
+      modalPasswordError.style.display = 'block';
+    }
     return;
   }
 
-  if (socket) {
-    socket.emit('changeName', { name });
+  // Determine the target room code
+  const targetRoomCode = modalJoinBtn ? modalJoinBtn.getAttribute('data-target-room-code') : roomCodeQuery;
+
+  if (isPasswordVisible) {
+    // Password-protected flow
+    let joinName = name;
+    if (!modalUsernameGroup || modalUsernameGroup.style.display === 'none') {
+      // Username group was hidden, meaning they joined from the main landing page
+      joinName = usernameInput ? usernameInput.value.trim() : '';
+    }
+
+    if (!joinName) {
+      alert("Lütfen geçerli bir takma ad girin.");
+      return;
+    }
+
+    if (modalPasswordError) modalPasswordError.style.display = 'none';
+
+    if (socket && targetRoomCode) {
+      socket.emit('joinRoom', {
+        roomCode: targetRoomCode.toUpperCase(),
+        name: joinName,
+        playerId: localPlayerId,
+        password: password
+      });
+    }
+  } else {
+    // Normal flow (only name change)
+    if (!name) {
+      alert("Lütfen geçerli bir takma ad girin.");
+      return;
+    }
+    if (socket) {
+      socket.emit('changeName', { name });
+    }
   }
 }
 
@@ -1949,6 +2101,14 @@ if (modalJoinBtn) {
 
 if (modalUsernameInput) {
   modalUsernameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      submitGuestUsername();
+    }
+  });
+}
+
+if (modalPasswordInput) {
+  modalPasswordInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       submitGuestUsername();
     }

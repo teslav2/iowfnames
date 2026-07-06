@@ -3329,13 +3329,13 @@ body {
 
 .guide-badge.red {
   background: rgba(255, 56, 96, 0.15);
-  color: var(--color-red);
+  color: #ff3860;
   border: 1px solid rgba(255, 56, 96, 0.3);
 }
 
 .guide-badge.blue {
   background: rgba(0, 210, 255, 0.15);
-  color: var(--color-blue);
+  color: #00D2FF;
   border: 1px solid rgba(0, 210, 255, 0.3);
 }
 
