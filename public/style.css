@@ -2042,8 +2042,8 @@ body {
   background-image: url('logos/liderkartlari.png') !important;
   background-size: 235% 235% !important;
   background-position: 9% 9% !important; /* Top-Left: Black Card cropped */
-  border: 2px solid rgba(255, 56, 96, 0.85) !important;
-  box-shadow: 0 0 16px rgba(255, 56, 96, 0.5) !important;
+  border: 2px solid #222222 !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8) !important;
 }
 
 /* AÇILAN KART YÜZÜ (Geriye Dönük Base Layer - Otopark Kart Dokuları) */
@@ -2180,8 +2180,8 @@ body {
 }
 
 .card-item.color-assassin.revealed .card-back {
-  border: 2px solid #ff3860 !important;
-  box-shadow: 0 0 22px rgba(255, 56, 96, 0.85), inset 0 0 16px rgba(255, 56, 96, 0.55) !important;
+  border: 2px solid #222222 !important;
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.85), inset 0 0 10px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* Color specific card word plates in Stage 2 (Matching reference image) */
@@ -2207,9 +2207,9 @@ body {
 
 .card-item.color-assassin.revealed.stage2 .card-back .card-word {
   background: #111111 !important; /* Deep charcoal black background */
-  border-color: #ff3860 !important;
-  color: #ff3860 !important;
-  box-shadow: 0 -4px 12px rgba(255, 56, 96, 0.25) !important;
+  border-color: #222222 !important;
+  color: #ffffff !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Kelime Etiketleri */

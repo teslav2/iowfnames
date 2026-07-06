@@ -90,6 +90,7 @@ const spectatorList = document.getElementById('spectator-list');
 const lobbyAdminControls = document.getElementById('lobby-admin-controls');
 const turnDurationSelect = document.getElementById('turn-duration-select');
 const maxPlayersSelect = document.getElementById('max-players-select');
+const wordPoolSelect = document.getElementById('word-pool-select');
 const shuffleTeamsBtn = document.getElementById('shuffle-teams-btn');
 
 // Room Panel (Chat/Players tabs)
@@ -337,6 +338,7 @@ if (typeof io !== 'undefined') {
     if (!isAdmin && roomData.settings) {
       safeSetValue(turnDurationSelect, roomData.settings.turnDuration);
       safeSetValue(maxPlayersSelect, roomData.settings.maxPlayers);
+      safeSetValue(wordPoolSelect, roomData.settings.wordPool);
     }
 
     // Sync Public/Private toggle (host only visibility)
@@ -629,6 +631,13 @@ if (maxPlayersSelect) {
   maxPlayersSelect.addEventListener('change', () => {
     const val = maxPlayersSelect.value;
     if (socket) socket.emit('updateSettings', { maxPlayers: val });
+  });
+}
+
+if (wordPoolSelect) {
+  wordPoolSelect.addEventListener('change', () => {
+    const val = wordPoolSelect.value;
+    if (socket) socket.emit('updateSettings', { wordPool: val });
   });
 }
 

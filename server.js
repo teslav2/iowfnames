@@ -458,22 +458,33 @@ app.get('/:roomCode', (req, res) => {
   }
 });
 
-// Load words from words_tr.json
-let wordList = [];
+// Load words from words_standard.json and words_tesla.json
+let wordsStandard = [];
+let wordsTesla = [];
+const fallbackWords = [
+  "CİLT", "ALAY", "KIRBAÇ", "SEPET", "KAŞ", "TORPİL", "MELEK", "FENER", "TAŞ", "GÜN",
+  "KEDİ", "REJİM", "PARTİ", "KAVAL", "YÜREK", "YEŞİL", "KULE", "ASKER", "KUVVET", "HAVA",
+  "KAVURMA", "DOLU", "SIRA", "MASKARA", "HELİKOPTER", "ANAHTAR", "AMERİKA", "ALTIN", "DEMİR",
+  "KARTAL", "ASLAN", "AT", "BALIK", "AĞAÇ", "ÇİÇEK", "DÜNYA", "GÜNEŞ", "AY", "DENİZ",
+  "DAĞ", "KALE", "KİTAP", "SAAT", "TELEFON", "ARABA", "EKMEK", "ELMA", "HASTANE", "DOKTOR",
+  "ÖĞRETMEN", "RÜZGAR", "YAĞMUR", "KAR", "ZAMAN", "SABAH", "KAPTAN", "KRAL", "MÜHENDİS",
+  "MİMAR", "BİLGİSAYAR", "TELEFON", "KALEM", "KAPLAN", "KÜTÜPHANE", "OKUL", "ÖĞRENCİ"
+];
+
 try {
-  const wordsData = fs.readFileSync(path.join(__dirname, 'words_tr.json'), 'utf8');
-  wordList = JSON.parse(wordsData);
+  const stdData = fs.readFileSync(path.join(__dirname, 'words_standard.json'), 'utf8');
+  wordsStandard = JSON.parse(stdData);
 } catch (error) {
-  console.error("Kelime listesi yüklenemedi. Varsayılan kelimeler kullanılacak.", error);
-  wordList = [
-    "CİLT", "ALAY", "KIRBAÇ", "SEPET", "KAŞ", "TORPİL", "MELEK", "FENER", "TAŞ", "GÜN",
-    "KEDİ", "REJİM", "PARTİ", "KAVAL", "YÜREK", "YEŞİL", "KULE", "ASKER", "KUVVET", "HAVA",
-    "KAVURMA", "DOLU", "SIRA", "MASKARA", "HELİKOPTER", "ANAHTAR", "AMERİKA", "ALTIN", "DEMİR",
-    "KARTAL", "ASLAN", "AT", "BALIK", "AĞAÇ", "ÇİÇEK", "DÜNYA", "GÜNEŞ", "AY", "DENİZ",
-    "DAĞ", "KALE", "KİTAP", "SAAT", "TELEFON", "ARABA", "EKMEK", "ELMA", "HASTANE", "DOKTOR",
-    "ÖĞRETMEN", "RÜZGAR", "YAĞMUR", "KAR", "ZAMAN", "SABAH", "KAPTAN", "KRAL", "MÜHENDİS",
-    "MİMAR", "BİLGİSAYAR", "TELEFON", "KALEM", "KAPLAN", "KÜTÜPHANE", "OKUL", "ÖĞRENCİ"
-  ];
+  console.error("words_standard.json yüklenemedi. Varsayılanlar kullanılacak.", error);
+  wordsStandard = fallbackWords;
+}
+
+try {
+  const teslaData = fs.readFileSync(path.join(__dirname, 'words_tesla.json'), 'utf8');
+  wordsTesla = JSON.parse(teslaData);
+} catch (error) {
+  console.error("words_tesla.json yüklenemedi. Varsayılanlar kullanılacak.", error);
+  wordsTesla = fallbackWords;
 }
 
 // Room database in-memory
@@ -548,8 +559,11 @@ function scanCharacters() {
 }
 
 // Helper: Generate Codenames Board (5x5, 25 cards)
-function generateBoard() {
-  const selectedWords = shuffle(wordList).slice(0, 25);
+function generateBoard(room) {
+  const wordPoolSetting = (room && room.settings && room.settings.wordPool) || 'standard';
+  const selectedPool = wordPoolSetting === 'tesla' ? wordsTesla : wordsStandard;
+  
+  const selectedWords = shuffle(selectedPool).slice(0, 25);
   const startingTeam = Math.random() < 0.5 ? 'red' : 'blue';
   const secondTeam = startingTeam === 'red' ? 'blue' : 'red';
   
@@ -595,7 +609,7 @@ function generateBoard() {
 
 // Game Action: Reset or Start Game state
 function initGame(room) {
-  const { startingTeam, cards } = generateBoard();
+  const { startingTeam, cards } = generateBoard(room);
   
   room.gameState = {
     board: cards,
@@ -746,7 +760,8 @@ io.on('connection', (socket) => {
         teamNames: { red: "KIRMIZI TAKIM", blue: "MAVİ TAKIM" },
         settings: {
           turnDuration: 90, // default 90 seconds
-          maxPlayers: 'unlimited' // max players limit (4, 6, 8, 10, 20, unlimited)
+          maxPlayers: 'unlimited', // max players limit (4, 6, 8, 10, 20, unlimited)
+          wordPool: 'standard' // 'standard' or 'tesla'
         }
       };
 
@@ -966,7 +981,7 @@ io.on('connection', (socket) => {
   });
 
   // 4. Update Game Settings (Host Only)
-  socket.on('updateSettings', ({ turnDuration, maxPlayers }) => {
+  socket.on('updateSettings', ({ turnDuration, maxPlayers, wordPool }) => {
     try {
       if (!currentRoomCode || !rooms[currentRoomCode]) return;
       const room = rooms[currentRoomCode];
@@ -977,6 +992,9 @@ io.on('connection', (socket) => {
       }
       if (maxPlayers !== undefined) {
         room.settings.maxPlayers = maxPlayers === 'unlimited' ? 'unlimited' : parseInt(maxPlayers);
+      }
+      if (wordPool !== undefined) {
+        room.settings.wordPool = wordPool;
       }
 
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
@@ -1224,7 +1242,7 @@ io.on('connection', (socket) => {
       currentTurn.role = 'agent'; // Change phase to agents
 
       const teamName = player.team === 'red' ? gameState.teamNames.red : gameState.teamNames.blue;
-      addLog(room, `${player.name} (${teamName} Anlatıcı) ipucu verdi: "${clueWord.toUpperCase()} ${clueCount}"`);
+      addLog(room, `${player.name} (${teamName} Anlatıcı) ipucu verdi: "${clueWord.toUpperCase()} (${clueCount})"`);
       
       startServerTimer(currentRoomCode); // Reset timer for agent guessing phase
       io.to(currentRoomCode).emit('roomState', getRoomClientData(currentRoomCode));
