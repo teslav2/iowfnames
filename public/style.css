@@ -1128,11 +1128,11 @@ body {
 }
 
 .side-team-name.red {
-  color: var(--color-red);
+  color: #ff3860;
 }
 
 .side-team-name.blue {
-  color: var(--color-blue);
+  color: #00D2FF;
 }
 
 .side-panel-score {
@@ -3786,13 +3786,13 @@ body {
 
 .turn-arrow.left {
   left: -50px;
-  color: var(--color-red);
+  color: #ff3860;
   text-shadow: 0 0 15px rgba(255, 56, 96, 0.8);
 }
 
 .turn-arrow.right {
   right: -50px;
-  color: var(--color-blue);
+  color: #00D2FF;
   text-shadow: 0 0 15px rgba(0, 210, 255, 0.8);
 }
 
