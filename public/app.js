@@ -1725,17 +1725,19 @@ function startCountdownTimer(seconds, title) {
 }
 
 function updateTimerUI(remaining, total) {
-  if (!timerNum || !timerBar) return;
+  if (!timerNum) return;
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
   timerNum.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
 
-  const pct = (remaining / total) * 100;
-  timerBar.style.width = `${pct}%`;
-  timerBar.className = "timer-progress-bar";
-  if (pct > 50) timerBar.classList.add('green');
-  else if (pct > 20) timerBar.classList.add('orange');
-  else timerBar.classList.add('red');
+  if (timerBar) {
+    const pct = (remaining / total) * 100;
+    timerBar.style.width = `${pct}%`;
+    timerBar.className = "timer-progress-bar";
+    if (pct > 50) timerBar.classList.add('green');
+    else if (pct > 20) timerBar.classList.add('orange');
+    else timerBar.classList.add('red');
+  }
 }
 
 function stopTimer() {
